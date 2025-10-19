@@ -1,0 +1,28 @@
+### Testar rota GET do portfolio
+GET http://localhost:5000/api/portfolio
+Content-Type: application/json
+
+###
+
+### Testar rota POST para adicionar nova crypto
+POST http://localhost:5000/api/portfolio
+Content-Type: application/json
+
+{
+  "symbol": "ADAUSDT",
+  "name": "Cardano",
+  "priceBuy": 0.45
+}
+
+### Testar rota DELETE para remover uma crypto
+DELETE http://localhost:5000/api/portfolio/ETHUSDT
+Content-Type: application/json
+
+### Testar atualização de uma moeda no portfólio
+PUT http://localhost:5000/api/portfolio/ETHUSDT
+Content-Type: application/json
+
+{
+  "priceBuy": 3500,
+  "name": "Ethereum Atualizado"
+}

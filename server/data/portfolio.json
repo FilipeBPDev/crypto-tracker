@@ -1,0 +1,4 @@
+[
+  { "id": 1, "coin": "Bitcoin", "symbol": "BTC", "amount": 0.5, "value": 15000 },
+  { "id": 2, "coin": "Ethereum", "symbol": "ETH", "amount": 2, "value": 6000 }
+]
