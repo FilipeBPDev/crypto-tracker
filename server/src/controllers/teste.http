@@ -26,3 +26,8 @@ Content-Type: application/json
   "priceBuy": 3500,
   "name": "Ethereum Atualizado"
 }
+
+
+### Teste do cálculo de valor total do portfólio
+GET http://localhost:5000/api/portfolio/value
+Content-Type: application/json

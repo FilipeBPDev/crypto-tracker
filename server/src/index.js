@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import cryptoRoutes from "../routes/cryptosRoutes.js";
-import portfolioRoutes from "../routes/portfolioRoutes.js";
+import cryptoRoutes from "../src/routes/cryptosRoutes.js";
+import portfolioRoutes from "../src/routes/portfolioRoutes.js";
+import { db } from "./config/db/connection.js";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,11 @@ app.use("/api", cryptoRoutes);
 app.use("/api", portfolioRoutes);
 
 
+
+
+db.query('SELECT 1')
+  .then(() => console.log('✅ Conexão com MySQL funcionando!'))
+  .catch((err) => console.error('❌ Erro ao conectar com MySQL:', err));
 
 
 

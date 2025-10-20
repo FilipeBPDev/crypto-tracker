@@ -44,5 +44,41 @@ export const updatePortfolio = (req, res) => {
     res.status(200).json(crypto);
 }
 
+export const getPortfolioValue = (req, res) => {
+    try {
+        if(!portfolio.length) {
+            return res.status(400).json({ message: "Seu portfólio está vazio"});
+        }
 
+        const portfolioWithValues = portfolio.map((crypto) => {
+            //armazena o valor atual da crypto
+            const currentPrice = crypto.priceBuy * (1 + crypto.change24h /100);
 
+            //pega quantidade de crypto, se não tiver nada, assume 1
+            const amount = crypto.amount || 1;
+            const valueNow = currentPrice * amount;
+
+            //armazena  e retorna lucro ou prejuizo
+            const profitLoss = (valueNow - crypto.priceBuy) * amount;
+             return {
+                ...crypto,
+                amount,
+                valueNow: parseFloat(currentPrice.toFixed(2)),
+                valueNow: parseFloat(valueNow.toFixed(2)),
+                profitLoss: parseFloat(profitLoss.toFixed(2))   
+             }
+        })
+             //calcula o valor total do portfilio
+             const totalValue = portfolioWithValues.reduce((acc, item) => acc + item.valueNow, 0);
+             
+             //resposta final
+             res.status(200).json({
+                portfolio: portfolioWithValues,
+                totalValue: parseFloat(totalValue.toFixed(2))
+             });
+    }
+    catch (error) {
+        console.error("Erro ao calcular o valor do portfólio:", error);
+        res.status(500).json({ message: "Erro interno do servidor"});
+    }
+}
