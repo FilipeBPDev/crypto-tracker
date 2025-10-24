@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cryptoRoutes from "../src/routes/cryptosRoutes.js";
 import portfolioRoutes from "../src/routes/portfolioRoutes.js";
+import transactionRoutes from "../src/routes/transactionsRoutes.js";
 import { db } from "./config/db/connection.js";
 
 dotenv.config();
@@ -17,6 +18,9 @@ app.use("/api", cryptoRoutes);
 
 //rota de portfolio
 app.use("/api", portfolioRoutes);
+
+//rota transactions
+app.use("/api", transactionRoutes);
 
 
 

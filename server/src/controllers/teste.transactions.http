@@ -1,0 +1,66 @@
+### 🧾 Obter todas as transações
+GET http://localhost:5000/api/transactions
+Content-Type: application/json
+
+###
+
+### 🔍 Obter transação por ID
+GET http://localhost:5000/api/transactions/tx001
+Content-Type: application/json
+
+###
+
+### 🔍 Obter transações por símbolo
+GET http://localhost:5000/api/transactions/symbol/BTCUSDT
+Content-Type: application/json
+
+###
+
+### ➕ Adicionar nova transação (compra)
+POST http://localhost:5000/api/transactions
+Content-Type: application/json
+
+{
+  "id": "tx004",
+  "symbol": "SOLUSDT",
+  "name": "Solana",
+  "type": "buy",
+  "amount": 5,
+  "price": 160
+}
+
+###
+
+### ➕ Adicionar nova transação (venda com saldo suficiente)
+POST http://localhost:5000/api/transactions
+Content-Type: application/json
+
+{
+  "id": "tx005",
+  "symbol": "BTCUSDT",
+  "name": "Bitcoin",
+  "type": "sell",
+  "amount": 0.3,
+  "price": 69000
+}
+
+###
+
+### ❌ Adicionar transação inválida (venda sem saldo)
+POST http://localhost:5000/api/transactions
+Content-Type: application/json
+
+{
+  "id": "tx006",
+  "symbol": "ETHUSDT",
+  "name": "Ethereum",
+  "type": "sell",
+  "amount": 5,
+  "price": 3500
+}
+
+###
+
+### 🗑️ Deletar transação por ID
+DELETE http://localhost:5000/api/transactions/tx002
+Content-Type: application/json
