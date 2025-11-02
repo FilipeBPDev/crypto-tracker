@@ -3,6 +3,7 @@ import { deleteCryptoController, getAllCryptosControl, getCryptoBySymbolControl,
 
 const router = express.Router();
 
+
 router.get("/market", getAllCryptosControl);
 
 router.get("/market/:symbol", getCryptoBySymbolControl);

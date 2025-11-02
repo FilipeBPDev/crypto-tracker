@@ -36,6 +36,7 @@ export const updateChange = async ( change_24h, symbol ) => {
     return rows;
 }
 
+//deletar crypto
 export const deleteCrypto = async ( symbol ) => {
     const query = `DELETE FROM crypto WHERE symbol = ?`;
     const [rows] = await db.query(query, [symbol]);
