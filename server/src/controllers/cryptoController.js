@@ -1,4 +1,4 @@
-import { getAllCryptos, insertCrypto, updatePrice } from "../DAO/cryptoDAO.js";
+import { deleteCrypto, getAllCryptos, insertCrypto, updateChange, updatePrice } from "../DAO/cryptoDAO.js";
 import { getCryptoBySymbol } from "../DAO/cryptoDAO.js";
 
 //simlar dados
@@ -58,3 +58,36 @@ export const updatePriceController = async (req, res) => {
     res.status(500).json({ error: "Erro interno ao atualizar preço" });
   }
 };
+
+export const updateChangeController = async (req, res) => {
+  try {
+    const { change_24h, symbol } = req.body;
+
+    const result = await updateChange( change_24h, symbol );
+  
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Cripto não encontrada para atualização" });
+    }
+    res.status(200).json({ message: "Variação atualizada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao atualizar variação:", error);
+    res.status(500).json({ error: "Erro interno ao atualizar variação" });
+  }
+}
+
+export const deleteCryptoController = async (req, res) => {
+  try {
+    const {symbol} = req.params;
+
+    const result = await deleteCrypto(symbol);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Cripto não encontrada para deletar" });
+    }
+
+    res.status(200).json({ message: "Cripto deletada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao deletar cripto:", error);
+    res.status(500).json({ error: "Erro interno ao deletar cripto" });
+  }
+}

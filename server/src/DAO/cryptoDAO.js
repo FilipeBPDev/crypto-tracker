@@ -28,3 +28,16 @@ export const updatePrice = async ( price, symbol) => {
     const [rows] = await db.query(query, [price, symbol]);
     return rows;
 }
+
+//atualiza o change
+export const updateChange = async ( change_24h, symbol ) => {
+    const query = `UPDATE crypto SET change_24h = ? WHERE symbol = ?`;
+    const [rows] = await db.query(query, [ change_24h, symbol]);
+    return rows;
+}
+
+export const deleteCrypto = async ( symbol ) => {
+    const query = `DELETE FROM crypto WHERE symbol = ?`;
+    const [rows] = await db.query(query, [symbol]);
+    return rows;
+}

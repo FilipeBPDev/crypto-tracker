@@ -127,3 +127,10 @@ Content-Type: application/json
   "symbol": "SOLUSDT",
   "price": 160.9
   }
+
+###
+
+### Teste DELETE para deletar uma cripto pelo símbolo
+
+DELETE http://localhost:5000/api/market/delete/ADAUSDT
+Content-Type: application/json
