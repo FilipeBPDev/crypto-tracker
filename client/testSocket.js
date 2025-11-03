@@ -1,16 +1,15 @@
 import { io } from "socket.io-client";
-
-// 1️⃣ URL do backend (confirme se está na mesma porta do seu index.js)
+//url backend
 const SOCKET_URL = "http://localhost:5000";
 
-// 2️⃣ Conexão com o servidor
+// conexão com o servidor
 const socket = io(SOCKET_URL, {
-  transports: ["websocket"], // força uso de WS puro
+  transports: ["websocket"],
   reconnectionAttempts: 3,
   timeout: 5000,
 });
 
-// 3️⃣ Eventos principais
+//eventos principais
 socket.on("connect", () => {
   console.log("✅ Conectado ao servidor Socket.IO com ID:", socket.id);
 });
@@ -27,12 +26,14 @@ socket.on("reconnect_attempt", (attempt) => {
   console.log("🔁 Tentando reconectar... tentativa:", attempt);
 });
 
-// 4️⃣ Receber atualizações de mercado
+// receber atualizações de mercado
 socket.on("marketUpdate", (data) => {
+  if (!data || !Array.isArray(data)) return;
   console.log("📈 Recebido update de mercado:");
-  console.log(
-    data.map((c) => `${c.s}: ${parseFloat(c.c).toFixed(2)}`).join(" | ")
-  );
+  const formatted = data.map(
+    (c) => `${c.symbol}: $${parseFloat(c.price).toFixed(2)} (${c.percentChange.toFixed(2)}%)`
+  ).join(" | ");
+  console.log(formatted);
 });
 
 // 5️⃣ Timeout de debug

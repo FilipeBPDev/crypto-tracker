@@ -49,7 +49,7 @@ const TOP_LIMIT = parseInt(process.env.TOP_LIMIT) || 12;
 const THROTTLE_INTERVAL = parseInt(process.env.THROTTLE_INTERVAL) || 1000;
 
 //variavel de cahce local
-let latestData = [];
+let latestData = {};
 
 io.on("connection", (socket) => {
   console.log("Novo cliente conectado:", socket.id);
@@ -61,35 +61,19 @@ io.on("connection", (socket) => {
   });
 });
 
-const processMarketData = (data) => {
+const processMarketData = (coinData) => {
   try {
-    //filtra apenas usdt
-    const usdtPairs = data.filter(
-      (coin => 
-        coin.s.endsWith("USDT") &&
-        !coin.s.startsWith("USDC") &&
-        !coin.s.startsWith("BUSD") &&
-        !coin.s.startsWith("TUSD") 
-      )
-    )
+    if(!coinData || !coinData.s || !coinData.c) return;
 
-    //encontrar btc e eth
-    const btc = usdtPairs.find((coin) => coin.s === "BTCUSDT");
-    const eth = usdtPairs.find((coin) => coin.s === "ETHUSDT");
-
-    //ordenar as demais por relevancia (volume * preço)
-    const others = usdtPairs.filter(
-      (coin) => coin.s !== "BTCUSDT" && coin.s !== "ETHUSDT").sort(
-        (a, b) => parseFloat(b.q) * parseFloat(b.c) - parseFloat(a.q) * parseFloat(a.c));
-
-    //monta ordem final
-    const topCoins = [btc, eth, ...others.slice(0, TOP_LIMIT - 2)].filter(Boolean);
-    
-
-    latestData = topCoins;
-
+    //atualiza dados com a moeda passada
+    latestData[coinData.s] = {
+      symbol: coinData.s,
+      price: parseFloat(coinData.c),
+      percentChange: parseFloat(coinData.P),
+      volume: parseFloat(coinData.q),
+    }
   } catch (error) {
-    console.error("Erro ao processar dados da Binance:", err);
+    console.error("Erro ao processar dados da Binance:", error);
   }
 }
 
@@ -98,8 +82,20 @@ startBinanceMArketStream(processMarketData);
 
 //envia dados a cada 1 segundo
 setInterval(() => {
-  if (latestData.length > 0) {
-    io.emit("marketUpdate", latestData);
+  const dataArray = Object.values(latestData);
+
+  if(dataArray.length > 0) {
+    //ordena pelo valor descrescente
+    const sorted = dataArray.sort((a, b) => b.volume - a.volume);
+
+    //se existir btc e eth, manter no topo
+    const btc = sorted.find((coin) => coin.symbol === "btcusdt");
+    const eth = sorted.find((coin) => coin.symbol === "ethusdt");
+    const others = sorted.filter((coin) => coin.symbol !== "btcusdt" && coin.symbol !== "ethusdt");
+
+    const topCoins = [btc, eth, ...others.slice(0, TOP_LIMIT -2)].filter(Boolean);
+
+    io.emit("marketUpdate", topCoins);
   }
 }, THROTTLE_INTERVAL);
 
@@ -108,5 +104,5 @@ setInterval(() => {
 
 // portas
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
+server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
