@@ -1,31 +1,42 @@
 import { CryptoIcon } from "@ledgerhq/crypto-icons";
 import { FaCoins } from "react-icons/fa";
 
-export const CRYPTO_ICONS = {
-  BTCUSDT: (
-    <div className="w-6 h-6 flex items-center justify-center">
-      <CryptoIcon ledgerId="bitcoin" ticker="BTC" size={20} />
+const DynamicCryptoIcon = ({ symbol, name }) => {
+  // normaliza os valores
+  const ticker = symbol?.replace("USDT", "").toUpperCase();
+  const ledgerId = name?.toLowerCase() || ticker.toLowerCase();
+
+  // ledgerId's
+  const supported = [
+    "bitcoin",
+    "ethereum",
+    "solana",
+    "binancecoin",
+    "ripple",
+    "cardano",
+    "dogecoin",
+    "polkadot",
+    "tron",
+    "chainlink",
+    "toncoin",
+  ];
+
+  const isSupported = supported.includes(ledgerId);
+
+  if (isSupported) {
+    return (
+      <div className="w-6 h-6 flex items-center justify-center transition-transform duration-300 hover:scale-125">
+        <CryptoIcon ledgerId={ledgerId} ticker={ticker} />
+      </div>
+    );
+  }
+
+  // fallback caso nao tenha o icone na lib
+  return (
+    <div className="flex items-center justify-center">
+      <FaCoins className="text-gray-400" />
     </div>
-  ),
-  ETHUSDT: (
-    <div className="w-6 h-6 flex items-center justify-center">
-      <CryptoIcon ledgerId="ethereum" ticker="ETH" size={20} />
-    </div>
-  ),
-  SOLUSDT: (
-    <div className="w-6 h-6 flex items-center justify-center">
-      <CryptoIcon ledgerId="solana" ticker="SOL" size={20} />
-    </div>
-  ),
-  XRPUSDT: (
-    <div className="w-6 h-6 flex items-center justify-center">
-      <CryptoIcon ledgerId="ripple" ticker="XRP" size={20} />
-    </div>
-  ),
-  DOTUSDT: (
-    <div className="w-6 h-6 flex items-center justify-center">
-      <CryptoIcon ledgerId="polkadot" ticker="DOT" size={20} />
-    </div>
-  ),
-  DEFAULT: <FaCoins size={16} className="text-gray-400" />,
+  );
 };
+
+export default DynamicCryptoIcon;

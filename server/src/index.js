@@ -61,6 +61,22 @@ io.on("connection", (socket) => {
   });
 });
 
+
+const COIN_NAMES = {
+  BTCUSDT: "bitcoin",
+  ETHUSDT: "ethereum",
+  SOLUSDT: "solana",
+  BNBUSDT: "binancecoin",
+  XRPUSDT: "ripple",
+  ADAUSDT: "cardano",
+  DOGEUSDT: "dogecoin",
+  DOTUSDT: "polkadot",
+  TRXUSDT: "tron",
+  LINKUSDT: "chainlink",
+  TONUSDT: "toncoin",
+};
+
+
 const processMarketData = (coinData) => {
   try {
     if(!coinData || !coinData.s || !coinData.c) return;
@@ -84,18 +100,35 @@ startBinanceMArketStream(processMarketData);
 setInterval(() => {
   const dataArray = Object.values(latestData);
 
-  if(dataArray.length > 0) {
-    //ordena pelo valor descrescente
+  if (dataArray.length > 0) {
+    // ordena pelo volume decrescente
     const sorted = dataArray.sort((a, b) => b.volume - a.volume);
 
-    //se existir btc e eth, manter no topo
-    const btc = sorted.find((coin) => coin.symbol === "btcusdt");
-    const eth = sorted.find((coin) => coin.symbol === "ethusdt");
-    const others = sorted.filter((coin) => coin.symbol !== "btcusdt" && coin.symbol !== "ethusdt");
+    // sempre BTC e ETH no topo
+    const btc = sorted.find((coin) => coin.symbol.toLowerCase() === "btcusdt");
+    const eth = sorted.find((coin) => coin.symbol.toLowerCase() === "ethusdt");
+    const others = sorted.filter(
+      (coin) =>
+        coin.symbol.toLowerCase() !== "btcusdt" &&
+        coin.symbol.toLowerCase() !== "ethusdt"
+    );
 
-    const topCoins = [btc, eth, ...others.slice(0, TOP_LIMIT -2)].filter(Boolean);
+    const topCoins = [btc, eth, ...others.slice(0, TOP_LIMIT - 2)].filter(Boolean);
 
-    io.emit("marketUpdate", topCoins);
+    // transforma em objeto
+    const dataObject = Object.fromEntries(
+      topCoins.map((coin) => [
+        coin.symbol.toUpperCase(),
+        {
+          name: COIN_NAMES[coin.symbol.toUpperCase()] || coin.symbol.toUpperCase(),
+          price: coin.price,
+          changePercent: coin.percentChange,
+          volume: coin.volume,
+        },
+      ])
+    );
+
+    io.emit("marketUpdate", dataObject);
   }
 }, THROTTLE_INTERVAL);
 
