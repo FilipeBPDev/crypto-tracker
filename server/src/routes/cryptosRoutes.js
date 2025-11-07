@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteCryptoController, getAllCryptosControl, getCryptoBySymbolControl, instertCryptoControl, updateChangeController, updatePriceController } from "../controllers/cryptoController.js";
+import { deleteCryptoController, getAllCryptosControl, getCryptoBySymbolControl, instertCryptoControl, saveOrUpdateCryptoController, updateChangeController, updatePriceController } from "../controllers/cryptoController.js";
 
 const router = express.Router();
 
@@ -14,6 +14,10 @@ router.put("/market/update", updatePriceController);
 
 router.put("/market/update24h", updateChangeController);
 
+router.post("/market/save", saveOrUpdateCryptoController);
+
 router.delete("/market/delete/:symbol", deleteCryptoController);
+
+
 
 export default router;

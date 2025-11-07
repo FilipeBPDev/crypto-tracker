@@ -134,3 +134,51 @@ Content-Type: application/json
 
 DELETE http://localhost:5000/api/market/delete/ADAUSDT
 Content-Type: application/json
+
+
+### Teste 1 — Inserir uma nova cripto (primeira vez)
+POST http://localhost:5000/api/market/save
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "name": "Bitcoin",
+  "price": 103098.45,
+  "change_24h": -2.94
+}
+
+
+### Teste 2 — Atualizar a mesma cripto (segunda vez)
+POST http://localhost:5000/api/market/save
+Content-Type: application/json
+
+{
+  "symbol": "ADAUSDT",
+  "name": "Cardano",
+  "price": 35.87,
+  "change_24h": -2.60
+}
+
+
+### 🔹 Inserir novo registro de histórico (primeira vez)
+POST http://localhost:5000/api/history/add
+Content-Type: application/json
+
+{
+  "symbol": "ETHUSDT",
+  "price": 14440.12,
+  "change_24h": -2.58
+}
+
+
+### 🔹 Tentar salvar novamente dentro do intervalo (deve bloquear)
+POST http://localhost:5000/api/history/add
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "price": 106550.10,
+  "change_24h": -2.48
+}
+
+

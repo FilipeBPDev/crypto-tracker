@@ -6,8 +6,10 @@ import { Server } from "socket.io";
 import cryptoRoutes from "../src/routes/cryptosRoutes.js";
 import portfolioRoutes from "../src/routes/portfolioRoutes.js";
 import transactionRoutes from "../src/routes/transactionsRoutes.js";
+import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
 import { db } from "./config/db/connection.js";
 import { startBinanceMArketStream } from "./services/binanceWS.js";
+import { startBinanceSync } from "./services/binanceSyncService.js";
 
 
 dotenv.config();
@@ -36,6 +38,9 @@ app.use("/api", portfolioRoutes);
 
 //rota transactions
 app.use("/api", transactionRoutes);
+
+//rota de history
+app.use("/api", cryptoHistoryRoutes);
 
 
 
@@ -137,5 +142,8 @@ setInterval(() => {
 
 // portas
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 
+  startBinanceSync();
+});

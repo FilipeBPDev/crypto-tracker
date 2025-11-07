@@ -1,12 +1,5 @@
-import { deleteCrypto, getAllCryptos, insertCrypto, updateChange, updatePrice } from "../DAO/cryptoDAO.js";
-import { getCryptoBySymbol } from "../DAO/cryptoDAO.js";
+import { deleteCrypto, getAllCryptos, insertCrypto, updateChange, updatePrice, getCryptoBySymbol, saveOrUpdateCrypto } from "../DAO/cryptoDAO.js";
 
-//simlar dados
-let cryptosCache = [
-  { symbol: "BTCUSDT", name: "Bitcoin", price: 68000, change24h: 2.5 },
-  { symbol: "ETHUSDT", name: "Ethereum", price: 3400, change24h: -1.2 },
-  { symbol: "SOLUSDT", name: "Solana", price: 155, change24h: 5.1 },
-];
 
 //pegar todas as cryptos
 export const getAllCryptosControl = async (req, res) => {
@@ -89,5 +82,25 @@ export const deleteCryptoController = async (req, res) => {
   } catch (error) {
     console.error("Erro ao deletar cripto:", error);
     res.status(500).json({ error: "Erro interno ao deletar cripto." });
+  }
+}
+
+export const saveOrUpdateCryptoController = async (req, res) => {
+  try {
+    const {symbol, name, price,  change_24h } = req.body;
+    const result = await saveOrUpdateCrypto(symbol, name, price, change_24h);
+    if(!result) {
+      return res.status(404).json({ message: "Dados de cripto inválidos"});
+    }
+    
+    res.status(200).json({ 
+      message: 
+      result.action === "inserted" ? "Cripto adicionada com sucesso!" : "Cripto atualizada com sucesso",
+      data: result
+    });
+  } catch (error ) {
+    console.error("Erro ao inserir cripto:", error);
+    res.status(500).json({ error: "Erro interno ao inserir cripto." });
+
   }
 }
