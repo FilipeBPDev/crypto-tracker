@@ -10,6 +10,7 @@ import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
 import { db } from "./config/db/connection.js";
 import { startBinanceMArketStream } from "./services/binanceWS.js";
 import { startBinanceSync } from "./services/binanceSyncService.js";
+import { startCleanHistoryService } from "./services/cleanHistoryService.js";
 
 
 dotenv.config();
@@ -146,4 +147,5 @@ server.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 
   startBinanceSync();
+  startCleanHistoryService();
 });

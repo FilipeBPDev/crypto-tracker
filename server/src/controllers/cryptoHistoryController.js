@@ -1,7 +1,10 @@
-import { insertRecord } from "../DAO/cryptoHistoryDAO.js"; 
+import { getHistoryBySymbol, insertRecord, deleteOldRecords } from "../DAO/cryptoHistoryDAO.js"; 
 
 const SAVE_INTERVAL = 60000; //alterar em prod
 const lastSaveTimestamps = new Map();
+const SYMBOL_REGEX = /^[A-Z0-9]{3,12}$/;
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 1000;
 
 
 
@@ -19,7 +22,7 @@ export const addCryptoController = async (req, res) => {
         const formatChange = parseFloat(change_24h);
 
         //validar symbol
-        const symbolRegex = /^[A-Z0-9]{3,12}$/;
+        const symbolRegex = SYMBOL_REGEX;
         if (!symbolRegex.test(formatSymbol)) {
             return res.status(400).json({ message: "Symbol inválido. Deve conter entre 3 e 12 caracteres alfanuméricos em maiúsculo." });
         }
@@ -69,10 +72,71 @@ export const updateHistoryController = (req, res) => {
 
 }
 
-export const getHistoryBySSymbolController = (req, res) => {
+export const getHistoryBySymbolController = async (req, res) => {
+     try {
+        const { symbol } = req.params;
+        const rawLimit = parseInt(req.query.limit, 10);
+        const { since, until, order } = req.query;
+
+        const limit = (!Number.isInteger(rawLimit) || rawLimit <= 0) 
+            ? DEFAULT_LIMIT 
+            : Math.min(rawLimit, MAX_LIMIT);
+
+        if (!symbol || !SYMBOL_REGEX.test(symbol.trim().toUpperCase())) { 
+            return res.status(400).json({ 
+                message: "símbolo inválido. use 3 a 12 caracteres alfanuméricos em maiúsculo.", 
+            });
+        }
+
+        let sinceDate = null;
+        let untilDate = null;
+
+        if (since && !isNaN(Date.parse(since))) {
+            sinceDate = new Date(since);
+        }
+        if (until && !isNaN(Date.parse(until))) {
+            untilDate = new Date(until);
+        }
+
+        const orderValue = order && order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+
+        const symbolUpper = symbol.trim().toUpperCase();
+
+        const data = await getHistoryBySymbol(symbolUpper, limit, sinceDate, untilDate, orderValue);
+        
+        return res.status(200).json({ 
+            symbol: symbolUpper,
+            count: data.length,
+            limit,
+            order: orderValue,
+            since: sinceDate,
+            until: untilDate,
+            data,
+        });
+    } catch (error) {
+        console.error("[Controller] getHistoryBySymbol error:", error);
+        return res.status(500).json({ error: "Erro interno ao recuperar histórico." });
+    }   
 
 }
 
-export const cleanOldRecordsController = (req, res) => {
+export const cleanOldRecordsController = async (req, res) => {
+  try {
+    const rawDays = parseInt(req.query.days, 10);
+    const days = Number.isInteger(rawDays) && rawDays > 0 ? rawDays : 7;
 
-}
+    const result = await deleteOldRecords(days);
+
+    return res.status(200).json({
+      message: `limpeza concluída com sucesso.`,
+      removed: result.affectedRows,
+      days,
+    });
+  } catch (error) {
+    console.error("[controller] erro ao limpar histórico:", error);
+    return res.status(500).json({
+      error: "erro interno ao limpar registros antigos.",
+    });
+  }
+};
