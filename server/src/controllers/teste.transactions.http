@@ -188,7 +188,7 @@ Content-Type: application/json
 
 
 ### busca histórico do btcusdt com limite definido
-GET http://localhost:5000/api/history/BTCUSDT?limit=20
+GET http://localhost:5000/api/history/BTCUSDT?limit=5
 Content-Type: application/json
 
 ###

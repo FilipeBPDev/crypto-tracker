@@ -3,8 +3,8 @@ import { getHistoryBySymbol, insertRecord, deleteOldRecords } from "../DAO/crypt
 const SAVE_INTERVAL = 60000; //alterar em prod
 const lastSaveTimestamps = new Map();
 const SYMBOL_REGEX = /^[A-Z0-9]{3,12}$/;
-const DEFAULT_LIMIT = 100;
-const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 30;
+const MAX_LIMIT = 200;
 
 
 
@@ -105,14 +105,33 @@ export const getHistoryBySymbolController = async (req, res) => {
 
         const data = await getHistoryBySymbol(symbolUpper, limit, sinceDate, untilDate, orderValue);
         
-        return res.status(200).json({ 
-            symbol: symbolUpper,
-            count: data.length,
-            limit,
-            order: orderValue,
-            since: sinceDate,
-            until: untilDate,
-            data,
+        data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        //retorna o horario
+        const formatarHora = (isoString) => {
+          const date = new Date(isoString);
+          return date.toLocaleString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+          });
+        };
+
+            //formata pro grafico
+        const chartData = data.map(item => ({
+          time: formatarHora(item.timestamp),
+          price: item.price,
+        }));
+
+        return res.status(200).json({
+          symbol: symbolUpper,
+          count: chartData.length,
+          limit,
+          order: "ASC", // já que agora ordenamos cronologicamente
+          since: sinceDate,
+          until: untilDate,
+          chartData,
         });
     } catch (error) {
         console.error("[Controller] getHistoryBySymbol error:", error);
