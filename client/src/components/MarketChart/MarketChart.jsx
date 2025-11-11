@@ -60,15 +60,27 @@ export const MarketChart = (user) => {
               </linearGradient>
             </defs>
 
-            <XAxis dataKey="time" stroke="#999" />
-            <YAxis stroke="#999" />
+            <XAxis
+              dataKey="time"
+              stroke="#999"
+              padding={{ left: -5, right: 0 }} // 🔹 valor negativo puxa ainda mais pra esquerda
+              tick={{ fontSize: 12 }}
+            />
+
+            <YAxis
+              stroke="#999"
+              width={28} // 🔹 reduzido ainda mais (de 35 → 28)
+              tick={{ fontSize: 12, dx: -5 }} // 🔹 desloca os números um pouco pra esquerda
+              axisLine={{ stroke: "#999" }}
+              tickLine={{ stroke: "#666" }}
+            />
             <Tooltip />
 
             <Line
               type="monotone"
               dataKey={mode === "user" ? "totalValue" : "avgChange"}
               stroke="url(#colorLine)"
-              strokeWidth={3.5} // linha mais espessa
+              strokeWidth={3.5}
               dot={false}
               fillOpacity={1}
               activeDot={{ r: 6, stroke: "#60A5FA", strokeWidth: 2 }}

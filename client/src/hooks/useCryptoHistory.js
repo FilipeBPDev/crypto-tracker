@@ -15,7 +15,7 @@ export const useCryptoHistory = (symbol, limit = 1440) => {
         setChartData(response.data.chartData);
       } catch (err) {
         setError("Erro ao carregar histórico da moeda");
-        console.error("❌ Erro ao buscar histórico:", err);
+        console.error("Erro ao buscar histórico:", err);
       } finally {
         setLoading(false);
       }
