@@ -7,6 +7,7 @@ import cryptoRoutes from "../src/routes/cryptosRoutes.js";
 import portfolioRoutes from "../src/routes/portfolioRoutes.js";
 import transactionRoutes from "../src/routes/transactionsRoutes.js";
 import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
+import authRoutes from "../src/routes/authRoutes.js"
 import { db } from "./config/db/connection.js";
 import { startBinanceMArketStream } from "./services/binanceWS.js";
 import { startBinanceSync } from "./services/binanceSyncService.js";
@@ -16,6 +17,55 @@ import { startCleanHistoryService } from "./services/cleanHistoryService.js";
 dotenv.config();
 
 const app = express();
+
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
+import morgan from "morgan";
+
+app.disable("x-powered-by");
+
+// protege com cabeçalhos de segurança
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
+// ativa compactação de respostas (gzip)
+app.use(compression());
+
+// logging HTTP simples (em produção pode trocar p/ "combined")
+app.use(morgan("dev"));
+
+//limita origen cors
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+
+//limitador de reqs em massa
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 200, // máximo de 200 requests/IP
+  message: "Muitas requisições. Tente novamente mais tarde.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(globalLimiter);
 
 const server = http.createServer(app);
 
@@ -27,7 +77,6 @@ const io = new Server(server, {
 })
 
 //middlewares
-app.use(cors());
 app.use(express.json());
 
 
@@ -43,6 +92,7 @@ app.use("/api", transactionRoutes);
 //rota de history
 app.use("/api", cryptoHistoryRoutes);
 
+app.use("/api", authRoutes);
 
 
 

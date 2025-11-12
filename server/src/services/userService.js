@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getUserByEmail, createUser  } from "../DAO/userDAO.js";
 
+
+
 //registrar usuario
 export const registerUser = async (name, email, password) => {
     try{
@@ -21,7 +23,7 @@ export const registerUser = async (name, email, password) => {
 
     } catch (error) {
         console.error("[userService] registerUser error:", error.message);
-        throw new error;
+        throw error;
 
     }
 }
@@ -38,15 +40,15 @@ export const loginUser = async (email, password) => {
         const isPasswordValid = await bcrypt.compare(password, result.password)
 
         if(!isPasswordValid) { 
-            throw new Error("Senha incorreta!");
+            throw new Error("Senha incorreta");
         }
         
         const { password: _, ...userWithoutPassword } = result;
 
         const token = jwt.sign(
         { id: result.id, email: result.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+        process.env.JWT_SECRET_DEV,
+        { expiresIn: process.env.JWT_EXPIRES_IN_DEV || "1h" }
         );
 
         return { ...userWithoutPassword, token };
