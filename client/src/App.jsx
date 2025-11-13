@@ -1,18 +1,35 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// Páginas
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MarketHistory from "./pages/MarketHistory/MarketHistory";
+import Login from "./pages/Login/Login";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Página inicial */}
-        <Route path="/" element={<Dashboard />} />
+        {/* pagina de login */}
+        <Route path="/login" element={<Login />} />
 
-        {/* Página de histórico (por símbolo) */}
-        <Route path="/history/:symbol" element={<MarketHistory />} />
+        {/* pagina inicial protegida (dashboard) */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* pagina de historico por simbolo (por enquanto sem protecao) */}
+        <Route
+          path="/history/:symbol"
+          element={
+            <ProtectedRoute>
+              <MarketHistory />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

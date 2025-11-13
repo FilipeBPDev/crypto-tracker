@@ -1,13 +1,34 @@
-import { useState } from "react";
+// src/components/Sidebar/Sidebar.jsx
+
+import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/logo.png";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
+  // hook de auth
+  const { user, getProfile, logout } = useAuth();
+
+  // controle de navegacao
+  const navigate = useNavigate();
+
+  // carrega dados do usuario ao abrir o dashboard
+  useEffect(() => {
+    getProfile();
+  }, []);
+
+  // funcao de logout real
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <>
-      {/* seta fixa no topo*/}
+      {/* seta fixa no topo */}
       <button
         className={`fixed top-5 left-3 z-50 md:hidden text-white/70 hover:text-white transition-transform duration-300 ${
           open ? "translate-x-[250px]" : "translate-x-0"
@@ -21,7 +42,7 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* overlay — fecha o menu ao clicar fora */}
+      {/* overlay */}
       {open && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-30 md:hidden"
@@ -30,29 +51,39 @@ export default function Sidebar() {
       )}
 
       {/* sidebar desktop */}
-      <aside className="hidden md:flex bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg pt-0 px-6 pb-6 mt-6 mb-6 ml-6 h-[calc(100vh-3rem)] flex-col justify-between hover:bg-white/15 transition-all duration-300">
+      <aside className="hidden md:flex bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg pt-0 px-6 pb-6 mt-6 mb-6 ml-6 h-[calc(100vh-3rem)] flex-col justify-between transition-all duration-300">
         <div>
           <div className="flex items-start justify-center mb-10">
             <img
               src={logo}
-              alt="Crypto Tracker Logo"
+              alt="crypto tracker logo"
               className="w-[130px] h-[130px] object-contain drop-shadow-md"
             />
           </div>
+
           <div className="flex items-center gap-4 mb-8">
             <div className="w-10 h-10 rounded-full bg-gray-300" />
+
             <div>
-              <p className="font-semibold text-light">Name Lastname</p>
+              <p className="font-semibold text-light text-sm">
+                {user?.name || "usuario"}
+              </p>
+              <p className="text-xs text-gray-400">{user?.email || ""}</p>
             </div>
           </div>
+
           <nav className="flex flex-col gap-8 mt-16 text-light">
-            <button className="text-left hover:text-light">Dashboard</button>
-            <button className="text-left hover:text-light">Transactions</button>
-            <button className="text-left hover:text-light">Settings</button>
+            <button className="text-left hover:text-light">dashboard</button>
+            <button className="text-left hover:text-light">transactions</button>
+            <button className="text-left hover:text-light">settings</button>
           </nav>
         </div>
-        <button className="text-sm text-muted hover:text-danger">
-          Log Out
+
+        <button
+          onClick={handleLogout}
+          className="text-sm text-muted hover:text-danger transition"
+        >
+          log out
         </button>
       </aside>
 
@@ -67,27 +98,36 @@ export default function Sidebar() {
             <div className="flex items-center justify-between mb-8">
               <img
                 src={logo}
-                alt="Crypto Tracker Logo"
+                alt="crypto tracker logo"
                 className="w-[100px] object-contain drop-shadow-md"
               />
             </div>
 
             <div className="flex items-center gap-3 mb-8">
               <div className="w-8 h-8 rounded-full bg-gray-300" />
-              <p className="font-semibold text-light text-sm">Name Lastname</p>
+
+              <div>
+                <p className="font-semibold text-light text-sm">
+                  {user?.name || "usuario"}
+                </p>
+                <p className="text-xs text-gray-400">{user?.email || ""}</p>
+              </div>
             </div>
 
             <nav className="flex flex-col gap-6 text-light">
-              <button className="text-left hover:text-light">Dashboard</button>
+              <button className="text-left hover:text-light">dashboard</button>
               <button className="text-left hover:text-light">
-                Transactions
+                transactions
               </button>
-              <button className="text-left hover:text-light">Settings</button>
+              <button className="text-left hover:text-light">settings</button>
             </nav>
           </div>
 
-          <button className="text-sm text-muted hover:text-danger mt-6">
-            Log Out
+          <button
+            onClick={handleLogout}
+            className="text-sm text-muted hover:text-danger mt-6"
+          >
+            log out
           </button>
         </div>
       </div>
