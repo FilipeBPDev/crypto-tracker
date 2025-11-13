@@ -18,7 +18,7 @@ export default function Sidebar() {
   // carrega dados do usuario ao abrir o dashboard
   useEffect(() => {
     getProfile();
-  }, []);
+  }, [getProfile]);
 
   // funcao de logout real
   const handleLogout = () => {

@@ -17,7 +17,7 @@ const Login = () => {
     if (isAuthenticated()) {
       navigate("/");
     }
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   // submit do formulario
   const handleSubmit = async (event) => {
@@ -44,17 +44,16 @@ const Login = () => {
           <img
             src={logo}
             alt="logo cryptotracker"
-            className="w-40 h-40 object-contain drop-shadow-xl"
+            className="w-44 h-44 object-contain drop-shadow-xl"
           />
         </div>
 
-        {/* titulo */}
         <h1 className="text-2xl font-semibold text-center mb-1 drop-shadow-sm">
           Acompanhe suas criptos
         </h1>
 
         <p className="text-center text-blue-300 text-sm mb-6 mt-6">
-          acesse sua conta com segurança
+          Acesse sua conta com segurança
         </p>
 
         {/* formulario */}
@@ -81,22 +80,23 @@ const Login = () => {
             />
           </div>
 
-          {/* erro */}
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+
+          {/* botao */}
           <button
             type="submit"
             disabled={loading}
             className="
-                w-full py-2 mt-3 text-sm font-medium rounded-lg text-white
-                bg-[#186085]
-                hover:bg-[#1f8fc9]
-                active:bg-[#166b94]
-                disabled:bg-[#186085]/50
-                disabled:cursor-not-allowed
-                transition-colors duration-200 shadow-lg shadow-[#186085]/30
+              w-full py-2 mt-3 text-sm font-medium rounded-lg text-white
+              bg-[#186085]
+              hover:bg-[#1f8fc9]
+              active:bg-[#166b94]
+              disabled:bg-[#186085]/50
+              disabled:cursor-not-allowed
+              transition-colors duration-200 shadow-lg shadow-[#186085]/30
             "
           >
-            {loading ? "entrando..." : "entrar"}
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
       </div>

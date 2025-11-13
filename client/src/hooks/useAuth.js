@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { loginRequest, registerRequest, getProfileRequest } from "../services/authService";
 
 // hook autenticacao
@@ -13,13 +13,9 @@ export const useAuth = () => {
       setLoading(true);
       setError(null);
 
-      // chama o service
       const data = await loginRequest(email, password);
 
-      // salva token no localstorage
       localStorage.setItem("token", data.token);
-
-      // salva dados do usuario
       setUser(data.user);
 
       return data.user;
@@ -39,9 +35,7 @@ export const useAuth = () => {
       setLoading(true);
       setError(null);
 
-      // chamada ao service
       const data = await registerRequest(name, email, password);
-
       return data;
 
     } catch (err) {
@@ -53,16 +47,13 @@ export const useAuth = () => {
     }
   };
 
-  // busca rota protegida /profile
+  // busca rota protegida
   const getProfile = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return null;
 
-      // chamada ao service
       const data = await getProfileRequest(token);
-
-      // atualiza usuario
       setUser(data.user);
 
       return data.user;
@@ -79,10 +70,10 @@ export const useAuth = () => {
     setUser(null);
   };
 
-  // verifica se esta autenticado
-  const isAuthenticated = () => {
+  // verifica autenticacao (agora memoizada)
+  const isAuthenticated = useCallback(() => {
     return !!localStorage.getItem("token");
-  };
+  }, []);
 
   return {
     user,
