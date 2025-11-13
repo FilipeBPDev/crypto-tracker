@@ -310,3 +310,71 @@ Content-Type: application/json
 ###
 GET http://localhost:5000/api/auth/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJ0ZXN0ZUBmaWxpcGVkZXYuY29tIiwiaWF0IjoxNzYzMDQyOTY1LCJleHAiOjE3NjMwNDY1NjV9.smJul0vxOpIJSiq51zrdyVrxu1GcV8mit32gO-kysbk
+
+
+
+
+
+### ============================
+### 1) TESTE ROTA PÚBLICA
+### ============================
+GET http://localhost:5000/api/auth/test
+Accept: application/json
+
+
+### ============================
+### 2) REGISTER - REGISTRO VÁLIDO
+### ============================
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Lipe Teste",
+  "email": "lipevalidacao@test.com",
+  "password": "123456"
+}
+
+
+### ============================
+### 3) REGISTER - TESTE DE VALIDAÇÃO (INVÁLIDO)
+### ============================
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "isso_nao_e_email",
+  "password": "12"
+}
+
+
+### ============================
+### 4) LOGIN - LOGIN VÁLIDO
+### ============================
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "lipevalidacao@test.com",
+  "password": "123456"
+}
+
+
+### ============================
+### 5) LOGIN - TESTE DE VALIDAÇÃO (INVÁLIDO)
+### ============================
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "email_invalido",
+  "password": ""
+}
+
+
+### ============================
+### 6) PROFILE - ROTA PROTEGIDA (USAR TOKEN)
+### ============================
+GET http://localhost:5000/api/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJsaXBldmFsaWRhY2FvQHRlc3QuY29tIiwiaWF0IjoxNzYzMDU1MDUxLCJleHAiOjE3NjMwNTg2NTF9.JDcBXfNybSD-sySWCevYGV2MzNofOUlkEPWAxteLMeE
+Accept: application/json
