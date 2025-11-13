@@ -296,7 +296,17 @@ Content-Type: application/json
 
 ###
 
-### 🧱 PROFILE - Rota privada (requer token JWT)
+
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@filipedev.com",
+  "password": "123456"
+}
+
+
+
+###
 GET http://localhost:5000/api/auth/profile
-Authorization: Bearer {{token_aqui}}
-Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJ0ZXN0ZUBmaWxpcGVkZXYuY29tIiwiaWF0IjoxNzYzMDQyOTY1LCJleHAiOjE3NjMwNDY1NjV9.smJul0vxOpIJSiq51zrdyVrxu1GcV8mit32gO-kysbk
