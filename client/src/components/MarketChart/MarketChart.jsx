@@ -12,26 +12,34 @@ import {
 } from "recharts";
 import useMarketChart from "../../hooks/useMarketChart";
 
-export const MarketChart = (user) => {
-  const { chartData, mode } = useMarketChart(user);
+export const MarketChart = ({
+  chartData: externalData,
+  mode: externalMode,
+  user,
+}) => {
+  // hook padrão (global ou usuario)
+  const { chartData, mode } = useMarketChart({ user });
 
-  // pleta de cores para o grafico de pizza
+  // se vier dados pela props (ex: pagina de historico), usa eles
+  const finalData = externalData || chartData;
+  const finalMode = externalMode || mode;
+
   const COLORS = ["#3B82F6", "#22C55E", "#EAB308", "#EC4899", "#8B5CF6"];
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
       <h2 className="text-lg font-semibold mb-3 text-gray-200">
-        {mode === "user"
-          ? "Distribuição da sua carteira"
-          : "Tendência do mercado"}
+        {finalMode === "user"
+          ? "distribuição da sua carteira"
+          : "tendência do mercado"}
       </h2>
 
       <ResponsiveContainer width="100%" height={250}>
-        {mode === "user" ? (
-          // grafico de Pizza (modo usuário)
+        {finalMode === "user" ? (
+          // grafico de pizza do usuario
           <PieChart>
             <Pie
-              data={chartData}
+              data={finalData}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -40,7 +48,7 @@ export const MarketChart = (user) => {
               outerRadius={90}
               label
             >
-              {chartData.map((entry, index) => (
+              {finalData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -51,8 +59,8 @@ export const MarketChart = (user) => {
             <Legend />
           </PieChart>
         ) : (
-          // grafico de Linha (modo global)
-          <LineChart data={chartData}>
+          // grafico de linha global
+          <LineChart data={finalData}>
             <defs>
               <linearGradient id="colorLine" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
@@ -63,14 +71,14 @@ export const MarketChart = (user) => {
             <XAxis
               dataKey="time"
               stroke="#999"
-              padding={{ left: -5, right: 0 }} // 🔹 valor negativo puxa ainda mais pra esquerda
+              padding={{ left: -5, right: 0 }}
               tick={{ fontSize: 12 }}
             />
 
             <YAxis
               stroke="#999"
-              width={28} // 🔹 reduzido ainda mais (de 35 → 28)
-              tick={{ fontSize: 12, dx: -5 }} // 🔹 desloca os números um pouco pra esquerda
+              width={28}
+              tick={{ fontSize: 12, dx: -5 }}
               axisLine={{ stroke: "#999" }}
               tickLine={{ stroke: "#666" }}
             />
@@ -78,7 +86,7 @@ export const MarketChart = (user) => {
 
             <Line
               type="monotone"
-              dataKey={mode === "user" ? "totalValue" : "avgChange"}
+              dataKey={finalMode === "user" ? "totalValue" : "price"}
               stroke="url(#colorLine)"
               strokeWidth={3.5}
               dot={false}
