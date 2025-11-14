@@ -26,6 +26,18 @@ export const MarketChart = ({
 
   const COLORS = ["#3B82F6", "#22C55E", "#EAB308", "#EC4899", "#8B5CF6"];
 
+  // pega o preco base (primeiro ponto)
+  const basePrice = finalData.length > 0 ? finalData[0].price : 0;
+
+  // calcula variacao percentual do preco
+  const percentData = finalData.map((item) => ({
+    ...item,
+    percent: basePrice > 0 ? ((item.price - basePrice) / basePrice) * 100 : 0,
+  }));
+
+  // filtra para deixar o grafico mais espaçado
+  const filteredPercentData = percentData.filter((_, index) => index % 3 === 0);
+
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
       <h2 className="text-lg font-semibold mb-3 text-gray-200">
@@ -59,8 +71,8 @@ export const MarketChart = ({
             <Legend />
           </PieChart>
         ) : (
-          // grafico de linha global
-          <LineChart data={finalData}>
+          // grafico de linha global usando variacao percentual
+          <LineChart data={filteredPercentData}>
             <defs>
               <linearGradient id="colorLine" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
@@ -77,16 +89,15 @@ export const MarketChart = ({
 
             <YAxis
               stroke="#999"
-              width={28}
-              tick={{ fontSize: 12, dx: -5 }}
-              axisLine={{ stroke: "#999" }}
-              tickLine={{ stroke: "#666" }}
+              width={53}
+              tickFormatter={(v) => `${v.toFixed(2)}%`}
             />
-            <Tooltip />
+
+            <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
 
             <Line
               type="monotone"
-              dataKey={finalMode === "user" ? "totalValue" : "price"}
+              dataKey="percent"
               stroke="url(#colorLine)"
               strokeWidth={3.5}
               dot={false}
