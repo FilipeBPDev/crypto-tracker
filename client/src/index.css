@@ -26,3 +26,21 @@ html, body, #root {
   height: 100%;
   background: transparent; /* deixa o gradiente do Dashboard aparecer */
 }
+
+/* preco subindo */
+.flash-green {
+  animation: flashGreen 0.5s ease-out;
+}
+@keyframes flashGreen {
+  0% { background-color: rgba(16, 185, 129, 0.4); }
+  100% { background-color: rgba(255, 255, 255, 0.1); }
+}
+
+/* preco caindo */
+.flash-red {
+  animation: flashRed 0.5s ease-out;
+}
+@keyframes flashRed {
+  0% { background-color: rgba(239, 68, 68, 0.4); }
+  100% { background-color: rgba(255, 255, 255, 0.1); }
+}

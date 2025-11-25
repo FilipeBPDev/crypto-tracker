@@ -10,45 +10,97 @@ import {
   Cell,
   Legend,
 } from "recharts";
+
+import { useState } from "react";
+import { useCryptoHistory } from "../../hooks/useCryptoHistory";
 import useMarketChart from "../../hooks/useMarketChart";
+import LivePrice from "../LivePrice/LivePrice";
+import FavoriteButton from "../FavoriteButton/FavoriteButton";
 
 export const MarketChart = ({
   chartData: externalData,
   mode: externalMode,
   user,
+  initialSymbol = "BTCUSDT",
 }) => {
-  // hook padrão (global ou usuario)
-  const { chartData, mode } = useMarketChart({ user });
+  const [selectedSymbol, setSelectedSymbol] = useState(initialSymbol);
 
-  // se vier dados pela props (ex: pagina de historico), usa eles
-  const finalData = externalData || chartData;
-  const finalMode = externalMode || mode;
+  // busca historico da moeda quando troca a moeda
+  const {
+    chartData: historyData,
+    loading,
+    error,
+  } = useCryptoHistory(selectedSymbol, 30);
+
+  // hook global (so usamos o mode)
+  const { mode: globalMode } = useMarketChart({ user });
+
+  // escolha final dos dados
+  const finalData = externalData || historyData || [];
+  const finalMode = externalMode || globalMode;
 
   const COLORS = ["#3B82F6", "#22C55E", "#EAB308", "#EC4899", "#8B5CF6"];
 
-  // pega o preco base (primeiro ponto)
+  // preco base
   const basePrice = finalData.length > 0 ? finalData[0].price : 0;
 
-  // calcula variacao percentual do preco
+  // variacao %
   const percentData = finalData.map((item) => ({
     ...item,
     percent: basePrice > 0 ? ((item.price - basePrice) / basePrice) * 100 : 0,
   }));
 
-  // filtra para deixar o grafico mais espaçado
-  const filteredPercentData = percentData.filter((_, index) => index % 3 === 0);
+  // filtro pq o grafico fica mais leve
+  const filteredPercentData = percentData.filter((_, i) => i % 3 === 0);
+
+  // moedas padroes
+  const coins = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-      <h2 className="text-lg font-semibold mb-3 text-gray-200">
-        {finalMode === "user"
-          ? "distribuição da sua carteira"
-          : "tendência do mercado"}
-      </h2>
+      {/* header do card */}
+      <div className="flex items-center justify-between mb-3">
+        {/* titulo + preco + favorito */}
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-gray-200 capitalize">
+            {finalMode === "user"
+              ? "distribuicao da carteira"
+              : `tendencia de ${selectedSymbol}`}
+          </h2>
 
+          {/* preco em tempo real */}
+          {finalMode !== "user" && <LivePrice symbol={selectedSymbol} />}
+
+          {/* botao favorito */}
+          {finalMode !== "user" && <FavoriteButton symbol={selectedSymbol} />}
+        </div>
+
+        {/* seletor de moeda */}
+        {!externalData && finalMode !== "user" && (
+          <select
+            value={selectedSymbol}
+            onChange={(e) => setSelectedSymbol(e.target.value)}
+            className="bg-white/10 border border-white/20 rounded-md px-2 py-1 
+                       text-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {coins.map((coin) => (
+              <option key={coin} value={coin}>
+                {coin}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {/* loading / erro */}
+      {loading && (
+        <p className="text-gray-400 text-center">carregando dados...</p>
+      )}
+      {error && <p className="text-red-400 text-center">{error}</p>}
+
+      {/* grafico */}
       <ResponsiveContainer width="100%" height={250}>
         {finalMode === "user" ? (
-          // grafico de pizza do usuario
           <PieChart>
             <Pie
               data={finalData}
@@ -60,18 +112,14 @@ export const MarketChart = ({
               outerRadius={90}
               label
             >
-              {finalData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+              {finalData.map((entry, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />
             <Legend />
           </PieChart>
         ) : (
-          // grafico de linha global usando variacao percentual
           <LineChart data={filteredPercentData}>
             <defs>
               <linearGradient id="colorLine" x1="0" y1="0" x2="0" y2="1">
@@ -80,29 +128,35 @@ export const MarketChart = ({
               </linearGradient>
             </defs>
 
-            <XAxis
-              dataKey="time"
-              stroke="#999"
-              padding={{ left: -5, right: 0 }}
-              tick={{ fontSize: 12 }}
-            />
-
+            <XAxis dataKey="time" stroke="#999" tick={{ fontSize: 12 }} />
             <YAxis
               stroke="#999"
               width={53}
               tickFormatter={(v) => `${v.toFixed(2)}%`}
             />
 
-            <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+            <Tooltip
+              contentStyle={{
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                backdropFilter: "blur(10px)",
+                borderRadius: "12px",
+                color: "#fff",
+              }}
+              labelStyle={{ color: "#cbd5e1" }}
+              formatter={(v) => `${v.toFixed(2)}%`}
+            />
 
             <Line
               type="monotone"
               dataKey="percent"
               stroke="url(#colorLine)"
-              strokeWidth={3.5}
+              strokeWidth={3.3}
               dot={false}
-              fillOpacity={1}
               activeDot={{ r: 6, stroke: "#60A5FA", strokeWidth: 2 }}
+              isAnimationActive={true}
+              animationDuration={700}
+              animationEasing="ease-in-out"
             />
           </LineChart>
         )}
