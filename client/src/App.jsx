@@ -30,7 +30,7 @@ function App() {
 
           {/*pagina profile*/}
           <Route
-            path="/settings"
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />

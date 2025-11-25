@@ -1,23 +1,42 @@
 // src/components/Sidebar/Sidebar.jsx
 
 import { useState } from "react";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Home,
+  LineChart,
+  Settings,
+} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/img/logo.png";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
-  // agora só pegamos user e logout
   const { user, logout } = useAuth();
-
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // funcao de logout
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  // atalhos úteis
+  const isActive = (route) => location.pathname === route;
+
+  const baseStyle =
+    "flex items-center gap-3 text-left text-gray-300 transition-all duration-200";
+  const hoverStyle =
+    "hover:text-white hover:translate-x-1 hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.7)]";
+  const activeStyle =
+    "text-white translate-x-1 drop-shadow-[0_0_6px_rgba(255,255,255,0.9)]";
+
+  const goTo = (path) => {
+    navigate(path);
+    setOpen(false);
   };
 
   return (
@@ -57,7 +76,6 @@ export default function Sidebar() {
 
           <div className="flex items-center gap-4 mb-8">
             <div className="w-10 h-10 rounded-full bg-gray-300" />
-
             <div>
               <p className="font-semibold text-light text-sm">
                 {user?.name || "usuário"}
@@ -67,9 +85,38 @@ export default function Sidebar() {
           </div>
 
           <nav className="flex flex-col gap-8 mt-16 text-light">
-            <button className="text-left hover:text-light">dashboard</button>
-            <button className="text-left hover:text-light">transactions</button>
-            <button className="text-left hover:text-light">settings</button>
+            {/* dashboard */}
+            <button
+              onClick={() => goTo("/")}
+              className={`${baseStyle} ${hoverStyle} ${
+                isActive("/") ? activeStyle : ""
+              }`}
+            >
+              <Home size={18} />
+              Dashboard
+            </button>
+
+            {/* grafico mercado */}
+            <button
+              onClick={() => goTo("/history")}
+              className={`${baseStyle} ${hoverStyle} ${
+                isActive("/history") ? activeStyle : ""
+              }`}
+            >
+              <LineChart size={18} />
+              Análise de Mercado
+            </button>
+
+            {/* config */}
+            <button
+              onClick={() => goTo("/profile")}
+              className={`${baseStyle} ${hoverStyle} ${
+                isActive("/profile") ? activeStyle : ""
+              }`}
+            >
+              <Settings size={18} />
+              Configurações
+            </button>
           </nav>
         </div>
 
@@ -99,7 +146,6 @@ export default function Sidebar() {
 
             <div className="flex items-center gap-3 mb-8">
               <div className="w-8 h-8 rounded-full bg-gray-300" />
-
               <div>
                 <p className="font-semibold text-light text-sm">
                   {user?.name || "usuário"}
@@ -109,11 +155,35 @@ export default function Sidebar() {
             </div>
 
             <nav className="flex flex-col gap-6 text-light">
-              <button className="text-left hover:text-light">dashboard</button>
-              <button className="text-left hover:text-light">
-                transactions
+              <button
+                onClick={() => goTo("/")}
+                className={`${baseStyle} ${hoverStyle} ${
+                  isActive("/") ? activeStyle : ""
+                }`}
+              >
+                <Home size={18} />
+                Dashboard
               </button>
-              <button className="text-left hover:text-light">settings</button>
+
+              <button
+                onClick={() => goTo("/history")}
+                className={`${baseStyle} ${hoverStyle} ${
+                  isActive("/history") ? activeStyle : ""
+                }`}
+              >
+                <LineChart size={18} />
+                Análise de Mercado
+              </button>
+
+              <button
+                onClick={() => goTo("/profile")}
+                className={`${baseStyle} ${hoverStyle} ${
+                  isActive("/profile") ? activeStyle : ""
+                }`}
+              >
+                <Settings size={18} />
+                Configurações
+              </button>
             </nav>
           </div>
 
