@@ -85,7 +85,6 @@ export const AuthProvider = ({ children }) => {
   // atualizar nome e email
   const updateUser = async (name, email) => {
     try {
-      setLoading(true);
       setError(null);
 
       const data = await updateUserRequest(name, email, token);
@@ -95,15 +94,12 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
   // atualizar senha
   const updatePassword = async (oldPassword, newPassword) => {
     try {
-      setLoading(true);
       setError(null);
 
       await updatePasswordRequest(oldPassword, newPassword, token);
@@ -111,8 +107,6 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
