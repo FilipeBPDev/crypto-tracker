@@ -1,6 +1,6 @@
 // src/components/Sidebar/Sidebar.jsx
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -9,18 +9,12 @@ import logo from "../../assets/img/logo.png";
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
-  // hook de auth
-  const { user, getProfile, logout } = useAuth();
+  // agora só pegamos user e logout
+  const { user, logout } = useAuth();
 
-  // controle de navegacao
   const navigate = useNavigate();
 
-  // carrega dados do usuario ao abrir o dashboard
-  useEffect(() => {
-    getProfile();
-  }, [getProfile]);
-
-  // funcao de logout real
+  // funcao de logout
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -28,7 +22,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* seta fixa no topo */}
+      {/* seta mobile */}
       <button
         className={`fixed top-5 left-3 z-50 md:hidden text-white/70 hover:text-white transition-transform duration-300 ${
           open ? "translate-x-[250px]" : "translate-x-0"
@@ -42,7 +36,7 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* overlay */}
+      {/* overlay mobile */}
       {open && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-30 md:hidden"
@@ -66,7 +60,7 @@ export default function Sidebar() {
 
             <div>
               <p className="font-semibold text-light text-sm">
-                {user?.name || "usuario"}
+                {user?.name || "usuário"}
               </p>
               <p className="text-xs text-gray-400">{user?.email || ""}</p>
             </div>
@@ -108,7 +102,7 @@ export default function Sidebar() {
 
               <div>
                 <p className="font-semibold text-light text-sm">
-                  {user?.name || "usuario"}
+                  {user?.name || "usuário"}
                 </p>
                 <p className="text-xs text-gray-400">{user?.email || ""}</p>
               </div>

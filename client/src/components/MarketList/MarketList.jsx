@@ -1,9 +1,11 @@
 import { useMarketSocket } from "../../hooks/useMarketSocket";
 import DynamicCryptoIcon from "../../constants/cryptoIcons";
 import { ArrowUp, ArrowDown } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
 export const MarketList = () => {
-  const { marketData, connected } = useMarketSocket();
+  const { token } = useAuth();
+  const { marketData, connected } = useMarketSocket(token);
 
   if (!connected)
     return (

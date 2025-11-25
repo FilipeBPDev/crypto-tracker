@@ -378,3 +378,59 @@ Content-Type: application/json
 GET http://localhost:5000/api/auth/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJsaXBldmFsaWRhY2FvQHRlc3QuY29tIiwiaWF0IjoxNzYzMDU1MDUxLCJleHAiOjE3NjMwNTg2NTF9.JDcBXfNybSD-sySWCevYGV2MzNofOUlkEPWAxteLMeE
 Accept: application/json
+
+###
+
+
+
+
+
+
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "123456"
+}
+
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "123456"
+}
+
+
+###
+
+GET http://localhost:5000/api/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiZW1haWwiOiJ0ZXN0dXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTc2NDA5NDQ1MCwiZXhwIjoxNzY0MDk4MDUwfQ.ptct-t5EvEUx3di02lPogx4IAIV_ytCFxcFp9oqpwzE
+
+###
+
+PUT http://localhost:5000/api/auth/update
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiZW1haWwiOiJ0ZXN0dXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTc2NDA5NDQ1MCwiZXhwIjoxNzY0MDk4MDUwfQ.ptct-t5EvEUx3di02lPogx4IAIV_ytCFxcFp9oqpwzE
+Content-Type: application/json
+
+{
+  "name": "Novo Nome",
+  "email": "novoemail@example.com"
+}
+
+###
+PUT http://localhost:5000/api/auth/update-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiZW1haWwiOiJ0ZXN0dXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTc2NDA5NDQ1MCwiZXhwIjoxNzY0MDk4MDUwfQ.ptct-t5EvEUx3di02lPogx4IAIV_ytCFxcFp9oqpwzE
+Content-Type: application/json
+
+{
+  "oldPassword": "123456",
+  "newPassword": "654321"
+}
+
+
+###
