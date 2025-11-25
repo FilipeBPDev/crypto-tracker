@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MarketHistory from "./pages/MarketHistory/MarketHistory";
 import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
 import ProtectedRoute from "./routes/ProtectedRoutes";
 import { AuthProvider } from "./context/AuthProvider"; // <-- importante
 
@@ -10,10 +11,13 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* página de login */}
+          {/* pagina de login */}
           <Route path="/login" element={<Login />} />
 
-          {/* página inicial protegida (dashboard) */}
+          {/* pagina de registro */}
+          <Route path="/register" element={<Register />} />
+
+          {/* pagina inicial protegida (dashboard) */}
           <Route
             path="/"
             element={
@@ -23,7 +27,7 @@ function App() {
             }
           />
 
-          {/* página de histórico por símbolo (protegida) */}
+          {/* pagina de histórico por símbolo (protegida) */}
           <Route
             path="/history/:symbol"
             element={

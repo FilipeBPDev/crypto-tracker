@@ -13,7 +13,6 @@ export const registerRequest = async (name, email, password) => {
 
   const data = await response.json();
 
-  // verifica erros
   if (!response.ok) {
     throw new Error(data.error || "erro ao registrar usuario");
   }
@@ -33,7 +32,6 @@ export const loginRequest = async (email, password) => {
 
   const data = await response.json();
 
-  // verifica erros
   if (!response.ok) {
     throw new Error(data.error || "erro ao fazer login");
   }
@@ -52,9 +50,48 @@ export const getProfileRequest = async (token) => {
 
   const data = await response.json();
 
-  // verifica erros
   if (!response.ok) {
     throw new Error(data.error || "token invalido");
+  }
+
+  return data;
+};
+
+// atualizar nome e email
+export const updateUserRequest = async (name, email, token) => {
+  const response = await fetch(`${API_URL}/update`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ name, email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "erro ao atualizar dados");
+  }
+
+  return data;
+};
+
+// atualizar senha
+export const updatePasswordRequest = async (oldPassword, newPassword, token) => {
+  const response = await fetch(`${API_URL}/update-password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ oldPassword, newPassword }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "erro ao atualizar senha");
   }
 
   return data;

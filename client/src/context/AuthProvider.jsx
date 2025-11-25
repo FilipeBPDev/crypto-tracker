@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
+
 import {
   loginRequest,
   registerRequest,
   getProfileRequest,
+  updateUserRequest,
+  updatePasswordRequest,
 } from "../services/authService";
 
 export const AuthProvider = ({ children }) => {
@@ -12,20 +15,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // verifica se usuario esta autenticado
   const isAuthenticated = useCallback(() => {
     return !!localStorage.getItem("token");
   }, []);
 
+  // carregar perfil ao iniciar app
   useEffect(() => {
     const loadProfile = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      const savedToken = localStorage.getItem("token");
+      if (!savedToken) {
         setLoading(false);
         return;
       }
 
       try {
-        const data = await getProfileRequest(token);
+        const data = await getProfileRequest(savedToken);
         setUser(data.user);
       } catch (err) {
         console.log("erro ao carregar perfil:", err.message);
@@ -39,19 +44,18 @@ export const AuthProvider = ({ children }) => {
     loadProfile();
   }, []);
 
+  // login
   const login = async (email, password) => {
     try {
       setLoading(true);
       setError(null);
 
       const data = await loginRequest(email, password);
+
+      // salva token e usuario
       localStorage.setItem("token", data.token);
-      setUser(data.user);
-
       setToken(data.token);
-
-      localStorage.setItem;
-      "token", data.token;
+      setUser(data.user);
 
       return data.user;
     } catch (err) {
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // registrar usuario
   const register = async (name, email, password) => {
     try {
       setLoading(true);
@@ -77,6 +82,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // atualizar nome e email
+  const updateUser = async (name, email) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await updateUserRequest(name, email, token);
+      setUser(data.user);
+
+      return data.user;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // atualizar senha
+  const updatePassword = async (oldPassword, newPassword) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await updatePasswordRequest(oldPassword, newPassword, token);
+      return true;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // logout
   const logout = () => {
     setToken(null);
     localStorage.removeItem("token");
@@ -93,6 +133,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateUser,
+        updatePassword,
         isAuthenticated,
       }}
     >
