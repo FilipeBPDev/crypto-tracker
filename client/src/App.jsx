@@ -40,7 +40,7 @@ function App() {
 
           {/* pagina de histórico por símbolo (protegida) */}
           <Route
-            path="/history/:symbol"
+            path="/history"
             element={
               <ProtectedRoute>
                 <MarketHistory />

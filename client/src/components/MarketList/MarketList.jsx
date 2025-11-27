@@ -27,7 +27,7 @@ export const MarketList = () => {
            border border-[rgba(255,255,255,0.08)] 
            rounded-2xl backdrop-blur-2xl
            shadow-[0_4px_30px_rgba(0,0,0,0.25)]
-           w-[340px] h-[330px] flex flex-col overflow-hidden
+           w-full max-w-[380px] h-[330px] flex flex-col overflow-hidden
            hover:shadow-[0_0_20px_rgba(88,101,242,0.1)] transition-all duration-300"
     >
       {/* cabeçalho fixo */}

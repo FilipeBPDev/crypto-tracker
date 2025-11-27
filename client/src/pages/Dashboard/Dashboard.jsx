@@ -1,9 +1,8 @@
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Topbar from "../../components/Topbar/Topbar";
-import Portfolio from "../../components/Portfolio/Portfolio";
 import MarketList from "../../components/MarketList/MarketList";
-import TransactionsTable from "../../components/TransactionsTable/TransactionsTable";
 import MarketChart from "../../components/MarketChart/MarketChart";
+import MarketHighlights from "../../components/MarketHighlights/MarketHighLights";
 
 export default function Dashboard() {
   return (
@@ -32,8 +31,8 @@ export default function Dashboard() {
         </div>
 
         {/* historico de transações */}
-        <div className="mt-4 md:mt-6">
-          <TransactionsTable />
+        <div className="mt-6">
+          <MarketHighlights />
         </div>
       </main>
     </div>

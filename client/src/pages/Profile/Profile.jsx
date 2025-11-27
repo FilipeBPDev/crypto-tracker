@@ -85,11 +85,11 @@ export default function Profile() {
         <Topbar />
 
         <h1 className="text-xl md:text-2xl font-semibold text-white mt-4">
-          configurações da conta
+          Configurações da conta
         </h1>
 
         <p className="text-blue-300 text-sm mb-6">
-          gerencie suas informações e segurança
+          Gerencie suas informações e segurança
         </p>
 
         {/* mensagens */}
@@ -108,12 +108,12 @@ export default function Profile() {
           {/* card -> dados do usuario */}
           <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
             <h2 className="text-lg font-semibold text-white mb-4">
-              dados pessoais
+              Dados pessoais
             </h2>
 
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div>
-                <label className="block text-sm mb-1">nome</label>
+                <label className="block text-sm mb-1">Nome:</label>
                 <input
                   type="text"
                   value={name}
@@ -123,7 +123,7 @@ export default function Profile() {
               </div>
 
               <div>
-                <label className="block text-sm mb-1">email</label>
+                <label className="block text-sm mb-1">Email:</label>
                 <input
                   type="email"
                   value={email}
@@ -145,7 +145,7 @@ export default function Profile() {
                   transition-colors duration-200 shadow-lg shadow-[#186085]/30
                 "
               >
-                {savingUser ? "salvando..." : "salvar alterações"}
+                {savingUser ? "Salvando..." : "Salvar alterações"}
               </button>
             </form>
           </div>
@@ -153,12 +153,12 @@ export default function Profile() {
           {/* card -> alterar senha */}
           <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
             <h2 className="text-lg font-semibold text-white mb-4">
-              alterar senha
+              Alterar senha
             </h2>
 
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div>
-                <label className="block text-sm mb-1">senha atual</label>
+                <label className="block text-sm mb-1">Senha atual</label>
                 <input
                   type="password"
                   value={oldPassword}
@@ -168,7 +168,7 @@ export default function Profile() {
               </div>
 
               <div>
-                <label className="block text-sm mb-1">nova senha</label>
+                <label className="block text-sm mb-1">Nova senha</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -179,7 +179,7 @@ export default function Profile() {
 
               <div>
                 <label className="block text-sm mb-1">
-                  confirmar nova senha
+                  Confirmar nova senha
                 </label>
                 <input
                   type="password"
@@ -202,7 +202,7 @@ export default function Profile() {
                   transition-colors duration-200 shadow-lg shadow-[#186085]/30
                 "
               >
-                {savingPassword ? "atualizando..." : "atualizar senha"}
+                {savingPassword ? "Atualizando..." : "Atualizar senha"}
               </button>
             </form>
           </div>

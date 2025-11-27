@@ -1,5 +1,3 @@
-// src/components/Sidebar/Sidebar.jsx
-
 import { useState } from "react";
 import {
   ChevronRight,
@@ -7,6 +5,7 @@ import {
   Home,
   LineChart,
   Settings,
+  User,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -64,7 +63,7 @@ export default function Sidebar() {
       )}
 
       {/* sidebar desktop */}
-      <aside className="hidden md:flex bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg pt-0 px-6 pb-6 mt-6 mb-6 ml-6 h-[calc(100vh-3rem)] flex-col justify-between transition-all duration-300">
+      <aside className="hidden md:flex bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg pt-0 px-6 pb-6 mt-6 mb-6 ml-6 h-[calc(100vh-2.3rem)] flex-col justify-between transition-all duration-300">
         <div>
           <div className="flex items-start justify-center mb-10">
             <img
@@ -75,7 +74,9 @@ export default function Sidebar() {
           </div>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-10 h-10 rounded-full bg-gray-300" />
+            <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-md">
+              <User size={20} strokeWidth={2} className="text-white/80" />
+            </div>
             <div>
               <p className="font-semibold text-light text-sm">
                 {user?.name || "usuário"}
@@ -145,7 +146,9 @@ export default function Sidebar() {
             </div>
 
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 rounded-full bg-gray-300" />
+              <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-md">
+                <User size={20} strokeWidth={2} className="text-white/80" />
+              </div>
               <div>
                 <p className="font-semibold text-light text-sm">
                   {user?.name || "usuário"}

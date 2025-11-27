@@ -57,31 +57,48 @@ export const MarketChart = ({
   const coins = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+    <div
+      className="bg-[rgba(15,23,42,0.6)]
+             border border-[rgba(255,255,255,0.08)]
+             rounded-2xl backdrop-blur-2xl
+             shadow-[0_4px_30px_rgba(0,0,0,0.25)]
+             p-4 transition-all duration-300
+             hover:shadow-[0_0_20px_rgba(88,101,242,0.1)]"
+    >
       {/* header do card */}
-      <div className="flex items-center justify-between mb-3">
-        {/* titulo + preco + favorito */}
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-gray-200 capitalize">
+      <div
+        className="
+          flex flex-col gap-3 mb-4
+          md:flex-row md:items-center md:justify-between
+        "
+      >
+        {/* bloco titulo + preco + favorito */}
+        <div className="flex flex-col md:flex-row md:items-center md:gap-3 text-center md:text-left">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-200 capitalize leading-tight">
             {finalMode === "user"
-              ? "distribuicao da carteira"
-              : `tendencia de ${selectedSymbol}`}
+              ? "distribuição da carteira"
+              : `tendência de ${selectedSymbol}`}
           </h2>
 
-          {/* preco em tempo real */}
-          {finalMode !== "user" && <LivePrice symbol={selectedSymbol} />}
-
-          {/* botao favorito */}
-          {finalMode !== "user" && <FavoriteButton symbol={selectedSymbol} />}
+          {/* bloco preco + favorito (no mobile fica lado a lado, centralizado) */}
+          {finalMode !== "user" && (
+            <div className="flex items-center justify-center gap-2 mt-1 md:mt-0">
+              <LivePrice symbol={selectedSymbol} />
+              <FavoriteButton symbol={selectedSymbol} />
+            </div>
+          )}
         </div>
 
-        {/* seletor de moeda */}
+        {/* seletor de moeda - fica abaixo no mobile, à direita no desktop */}
         {!externalData && finalMode !== "user" && (
           <select
             value={selectedSymbol}
             onChange={(e) => setSelectedSymbol(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-md px-2 py-1 
-                       text-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+            className="
+              bg-white/10 border border-white/20 rounded-md px-2 py-1 
+              text-gray-200 outline-none focus:ring-2 focus:ring-blue-500
+              w-full md:w-auto
+            "
           >
             {coins.map((coin) => (
               <option key={coin} value={coin}>

@@ -12,7 +12,7 @@ export const useMarketSocket = () => {
         });
 
         socket.on("connect", () => {
-          console.log("✅ Conectado ao servidor WebSocket:", socket.id);
+          //console.log("✅ Conectado ao servidor WebSocket:", socket.id);
           setConnected(true);
         });
 
@@ -21,7 +21,7 @@ export const useMarketSocket = () => {
         });
 
         socket.on("disconnect", () => {
-          console.log("❌ Desconectado do servidor WebSocket");
+          //console.log("❌ Desconectado do servidor WebSocket");
           setConnected(false);
         });
 
