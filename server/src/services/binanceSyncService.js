@@ -1,3 +1,4 @@
+/*
 import WebSocket from "ws";
 import dotenv from "dotenv";
 import { insertRecord } from "../DAO/cryptoHistoryDAO.js";
@@ -61,3 +62,4 @@ export const startBinanceSync = () => {
     connect();
   });
 };
+ */
