@@ -10,7 +10,7 @@ import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
 import authRoutes from "../src/routes/authRoutes.js"
 import { db } from "./config/db/connection.js";
 import { startBinanceMArketStream } from "./services/binanceWS.js";
-import { startBinanceSync } from "./services/binanceSyncService.js";
+//import { startBinanceSync } from "./services/binanceSyncService.js";
 import { startCleanHistoryService } from "./services/cleanHistoryService.js";
 
 
