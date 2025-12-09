@@ -24,63 +24,60 @@ const TOP_PAIRS = (process.env.BINANCE_TOP_PAIRS ||
 const lastSaveMap = new Map();
 
 export const startBinanceMArketStream = (onMessage) => {
-  // inicia uma conexão individual por par
-  TOP_PAIRS.forEach((symbol) => {
-    connectSinglePair(symbol, onMessage);
-  });
-};
+  // monta stream único com todos os pares
+  const streams = TOP_PAIRS.map((p) => `${p}@ticker`).join("/");
 
-// gerencia uma única conexão websocket por par
-function connectSinglePair(symbol, onMessage) {
-  const wsURL = `${WORKER_URL}/${symbol}@ticker`;
-  console.log(`Conectando ao Worker Proxy para ${symbol.toUpperCase()}: ${wsURL}`);
+  // monta url final do worker
+  const wsURL = `${WORKER_URL}/stream?streams=${streams}`;
 
-  const ws = new WebSocket(wsURL);
+  console.log("Conectando ao Worker Proxy:", wsURL);
+
+  let ws = new WebSocket(wsURL);
 
   // quando conectar
   ws.on("open", () => {
-    console.log(`Stream conectado com sucesso para ${symbol.toUpperCase()}`);
+    console.log("Conexão única com Worker Proxy estabelecida com sucesso");
   });
 
   // quando receber dados
   ws.on("message", async (raw) => {
     try {
-      const ticker = JSON.parse(raw);
+      const payload = JSON.parse(raw);
+      if (!payload || !payload.data) return;
 
-      if (!ticker || !ticker.s || !ticker.c) return;
+      const data = payload.data;
 
-      const sym = ticker.s;
-      const price = parseFloat(ticker.c);
-      const change = parseFloat(ticker.P);
+      const symbol = data.s;
+      const price = parseFloat(data.c);
+      const change = parseFloat(data.P);
 
       // envia dados atualizados para o front-end
-      onMessage(ticker);
+      onMessage(data);
 
-      // salva no banco a cada SAVE_INTERVAL
+      // salva histórico apenas 1x por minuto
       const agora = Date.now();
-      const ultimo = lastSaveMap.get(sym) || 0;
+      const ultimo = lastSaveMap.get(symbol) || 0;
 
       if (agora - ultimo >= SAVE_INTERVAL) {
-        await insertRecord(sym, price, change);
-        lastSaveMap.set(sym, agora);
-        console.log(`Histórico salvo: ${sym} | Preço: ${price}`);
+        await insertRecord(symbol, price, change);
+        lastSaveMap.set(symbol, agora);
+        console.log(`Histórico salvo: ${symbol} | ${price}`);
       }
+
     } catch (err) {
-      console.error(`Erro ao processar dados (${symbol}):`, err.message);
+      console.error("Erro ao processar dados:", err.message);
     }
   });
 
-  // quando a conexão fecha
+  // quando fechar
   ws.on("close", () => {
-    console.warn(`Stream encerrado para ${symbol}. Tentando reconectar...`);
-    setTimeout(() => connectSinglePair(symbol, onMessage), RECONNECT_DELAY);
+    console.warn("Conexão encerrada. Tentando reconectar...");
+    setTimeout(() => startBinanceMArketStream(onMessage), RECONNECT_DELAY);
   });
 
-  // quando ocorrer erro
+  // quando der erro
   ws.on("error", (err) => {
-    console.error(`Erro no WebSocket (${symbol}):`, err.message);
-    try {
-      ws.close();
-    } catch (_) {}
+    console.error("Erro no WebSocket:", err.message);
+    try { ws.close(); } catch (_) {}
   });
-}
+};
