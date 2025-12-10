@@ -9,7 +9,7 @@ import transactionRoutes from "../src/routes/transactionsRoutes.js";
 import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
 import authRoutes from "../src/routes/authRoutes.js"
 import { db } from "./config/db/connection.js";
-import { startBinanceMArketStream } from "./services/binanceWS.js";
+import { startBinanceMarketStream } from "./services/binanceWS.js";
 //import { startBinanceSync } from "./services/binanceSyncService.js";
 import { startCleanHistoryService } from "./services/cleanHistoryService.js";
 
@@ -152,7 +152,8 @@ const processMarketData = (coinData) => {
 }
 
 //inicia stream da binance
-startBinanceMArketStream(processMarketData);
+startBinanceMarketStream(processMarketData);
+
 
 //envia dados a cada 1 segundo
 setInterval(() => {
