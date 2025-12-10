@@ -1,71 +1,83 @@
-import axios from "axios";
+import WebSocket from "ws";
 import dotenv from "dotenv";
 import { insertRecord } from "../DAO/cryptoHistoryDAO.js";
 
 dotenv.config();
+
+// url do worker proxy (cloudflare)
+const WORKER_URL = process.env.BINANCE_PROXY_WS;
+
+// tempo de reconexão automática
+const RECONNECT_DELAY = 5000;
+
+// intervalo de salvamento do histórico (1 minuto)
+const SAVE_INTERVAL = 60000;
 
 // pares configurados no .env (fallback padrão)
 const TOP_PAIRS = (process.env.BINANCE_TOP_PAIRS ||
   "btcusdt,ethusdt,bnbusdt,solusdt,xrpusdt,adausdt,dogeusdt,linkusdt,tonusdt,trxusdt"
 )
   .split(",")
-  .map((p) => p.trim().toUpperCase());
-
-// intervalo do polling (3s)
-const POLL_INTERVAL = 3000;
-
-// intervalo para salvar histórico (1 minuto)
-const SAVE_INTERVAL = 60000;
+  .map((p) => p.trim().toLowerCase());
 
 // controle do último horário salvo por moeda
 const lastSaveMap = new Map();
 
-// inicia polling de mercado
 export const startBinanceMArketStream = (onMessage) => {
-  console.log("Iniciando polling da Binance (REST cada 3s)...");
+  // monta stream único com todos os pares
+  const streams = TOP_PAIRS.map((p) => `${p}@ticker`).join("/");
 
-  const fetchMarketData = async () => {
+  // monta url final do worker
+  const wsURL = `${WORKER_URL}/stream?streams=${streams}`;
+
+  console.log("Conectando ao Worker Proxy:", wsURL);
+
+  let ws = new WebSocket(wsURL);
+
+  // quando conectar
+  ws.on("open", () => {
+    console.log("Conexão única com Worker Proxy estabelecida com sucesso");
+  });
+
+  // quando receber dados
+  ws.on("message", async (raw) => {
     try {
-      // busca dados 24hr de cada par
-      const responses = await Promise.all(
-        TOP_PAIRS.map((symbol) =>
-          axios.get(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
-        )
-      );
+      const payload = JSON.parse(raw);
+      if (!payload || !payload.data) return;
 
-      for (const resp of responses) {
-        const data = resp.data;
+      const data = payload.data;
 
-        const symbol = data.symbol;
-        const price = parseFloat(data.lastPrice);
-        const change = parseFloat(data.priceChangePercent);
+      const symbol = data.s;
+      const price = parseFloat(data.c);
+      const change = parseFloat(data.P);
 
-        // envia esses dados para o backend processar
-        onMessage({
-          s: symbol,
-          c: price,
-          P: change,
-          q: parseFloat(data.volume),
-        });
+      // envia dados atualizados para o front-end
+      onMessage(data);
 
-        // salvamento no histórico
-        const agora = Date.now();
-        const ultimo = lastSaveMap.get(symbol) || 0;
+      // salva histórico apenas 1x por minuto
+      const agora = Date.now();
+      const ultimo = lastSaveMap.get(symbol) || 0;
 
-        if (agora - ultimo >= SAVE_INTERVAL) {
-          await insertRecord(symbol, price, change);
-          lastSaveMap.set(symbol, agora);
-          console.log(`Histórico salvo: ${symbol} | ${price}`);
-        }
+      if (agora - ultimo >= SAVE_INTERVAL) {
+        await insertRecord(symbol, price, change);
+        lastSaveMap.set(symbol, agora);
+        console.log(`Histórico salvo: ${symbol} | ${price}`);
       }
+
     } catch (err) {
-      console.error("Erro ao buscar dados da Binance:", err.message);
+      console.error("Erro ao processar dados:", err.message);
     }
-  };
+  });
 
-  // executa uma vez imediatamente
-  fetchMarketData();
+  // quando fechar
+  ws.on("close", () => {
+    console.warn("Conexão encerrada. Tentando reconectar...");
+    setTimeout(() => startBinanceMArketStream(onMessage), RECONNECT_DELAY);
+  });
 
-  // executa a cada 3 segundos
-  setInterval(fetchMarketData, POLL_INTERVAL);
+  // quando der erro
+  ws.on("error", (err) => {
+    console.error("Erro no WebSocket:", err.message);
+    try { ws.close(); } catch (_) {}
+  });
 };
