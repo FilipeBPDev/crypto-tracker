@@ -18,6 +18,8 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
