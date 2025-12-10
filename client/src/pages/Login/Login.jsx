@@ -59,7 +59,7 @@ const Login = () => {
         {/* formulario */}
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div>
-            <label className="block text-sm mb-1">email</label>
+            <label className="block text-sm mb-1">Email</label>
             <input
               type="email"
               className="w-full bg-[#020617] border border-white/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -70,7 +70,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">senha</label>
+            <label className="block text-sm mb-1">Senha</label>
             <input
               type="password"
               className="w-full bg-[#020617] border border-white/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -100,12 +100,12 @@ const Login = () => {
           </button>
           {/* botão para registro */}
           <p className="text-center text-sm text-blue-300 mt-6">
-            não tem uma conta?{" "}
+            Não tem uma conta?{" "}
             <span
               className="text-blue-400 underline cursor-pointer hover:text-blue-300"
               onClick={() => navigate("/register")}
             >
-              criar conta
+              Criar conta
             </span>
           </p>
         </form>

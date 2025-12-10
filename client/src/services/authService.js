@@ -1,5 +1,4 @@
-// url base da api de autenticacao
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
 // request de registro
 export const registerRequest = async (name, email, password) => {
