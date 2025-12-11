@@ -12,6 +12,8 @@ const TOP_PAIRS = (process.env.BINANCE_TOP_PAIRS || "")
 
 const lastSave = new Map();
 
+console.log("TOP_PAIRS:", TOP_PAIRS);
+
 // busca REST na Binance
 async function fetchTicker(symbol) {
   try {
