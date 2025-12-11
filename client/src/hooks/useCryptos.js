@@ -12,7 +12,7 @@ export const useCryptos = () => {
             setCryptos(response.data);
         } catch (err) {
             setError("Erro ao carregar dados do mercado");
-            console.error("❌ Erro ao buscar cryptos:", err);
+            console.error("Erro ao buscar cryptos:", err);
         } finally {
             setLoading(false);
         }

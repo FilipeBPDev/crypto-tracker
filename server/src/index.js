@@ -3,16 +3,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import http from "http";
 import { Server } from "socket.io";
+
 import cryptoRoutes from "../src/routes/cryptosRoutes.js";
 import portfolioRoutes from "../src/routes/portfolioRoutes.js";
 import transactionRoutes from "../src/routes/transactionsRoutes.js";
 import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
-import authRoutes from "../src/routes/authRoutes.js"
+import authRoutes from "../src/routes/authRoutes.js";
+
 import { db } from "./config/db/connection.js";
 import { startBinancePolling } from "./services/binancePolling.js";
-//import { startBinanceSync } from "./services/binanceSyncService.js";
 import { startCleanHistoryService } from "./services/cleanHistoryService.js";
-
 
 dotenv.config();
 
@@ -20,6 +20,9 @@ const app = express();
 
 app.set("trust proxy", 1);
 
+/* ====================================
+   Imports adicionais de segurança
+==================================== */
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
@@ -27,41 +30,41 @@ import morgan from "morgan";
 
 app.disable("x-powered-by");
 
-// protege com cabeçalhos de segurança
+/* ====================================
+   Segurança com Helmet
+==================================== */
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
-// ativa compactação de respostas (gzip)
+/* ====================================
+   Compressão global
+==================================== */
 app.use(compression());
 
-// logging HTTP simples (em produção pode trocar p/ "combined")
+/* ====================================
+   Logs HTTP
+==================================== */
 app.use(morgan("dev"));
 
-//limita origen cors
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
-];
-
+/* ====================================
+   Configuração CORS global
+==================================== */
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-
-//limitador de reqs em massa
+/* ====================================
+   Rate limiting
+==================================== */
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 200, // máximo de 200 requests/IP
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   message: "Muitas requisições. Tente novamente mais tarde.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -69,46 +72,57 @@ const globalLimiter = rateLimit({
 
 app.use(globalLimiter);
 
+/* ====================================
+   Inicialização do servidor HTTP
+==================================== */
 const server = http.createServer(app);
 
+/* ====================================
+   Configuração do Socket.IO
+==================================== */
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST"],
-  }
-})
+    credentials: true,
+  },
+  transports: ["websocket", "polling"],
+});
 
-//middlewares
+/* ====================================
+   Middlewares de processamento
+==================================== */
 app.use(express.json());
 
-
-//rotas de cryptos
+/* ====================================
+   Rotas da API
+==================================== */
 app.use("/api", cryptoRoutes);
-
-//rota de portfolio
 app.use("/api", portfolioRoutes);
-
-//rota transactions
 app.use("/api", transactionRoutes);
-
-//rota de history
 app.use("/api", cryptoHistoryRoutes);
-
 app.use("/api", authRoutes);
 
+/* ====================================
+   Teste inicial de conexão com MySQL
+==================================== */
+db.query("SELECT 1")
+  .then(() => console.log("Conexão com MySQL funcionando"))
+  .catch((err) => console.error("Erro ao conectar com MySQL:", err));
 
-
-db.query('SELECT 1')
-  .then(() => console.log('Conexão com MySQL funcionando!'))
-  .catch((err) => console.error('Erro ao conectar com MySQL:', err));
-
-  //config de mercado
+/* ====================================
+   Configurações adicionais
+==================================== */
 const TOP_LIMIT = parseInt(process.env.TOP_LIMIT) || 12;
 const THROTTLE_INTERVAL = parseInt(process.env.THROTTLE_INTERVAL) || 1000;
 
-//variavel de cahce local
+/* ====================================
+   Cache local de mercado
+==================================== */
 let latestData = {};
 
+/* ====================================
+   Eventos do Socket.IO
+==================================== */
 io.on("connection", (socket) => {
   console.log("Novo cliente conectado:", socket.id);
 
@@ -119,7 +133,9 @@ io.on("connection", (socket) => {
   });
 });
 
-
+/* ====================================
+   Mapeamento dos nomes das moedas
+==================================== */
 const COIN_NAMES = {
   BTCUSDT: "bitcoin",
   ETHUSDT: "ethereum",
@@ -134,45 +150,30 @@ const COIN_NAMES = {
   TONUSDT: "toncoin",
 };
 
-
-const processMarketData = (coinData) => {
-  try {
-    if(!coinData || !coinData.s || !coinData.c) return;
-
-    //atualiza dados com a moeda passada
-    latestData[coinData.s] = {
-      symbol: coinData.s,
-      price: parseFloat(coinData.c),
-      percentChange: parseFloat(coinData.P),
-      volume: parseFloat(coinData.q),
-    }
-  } catch (error) {
-    console.error("Erro ao processar dados da Binance:", error);
-  }
-}
-
-//inicia stream da binance
+/* ====================================
+   Início do Polling da Binance
+==================================== */
 startBinancePolling((symbol, price, percent, volume) => {
   latestData[symbol] = {
     symbol,
     price,
     percentChange: percent,
-    volume
+    volume,
   };
 });
 
-
-//envia dados a cada 1 segundo
+/* ====================================
+   Emissão periódica dos dados ao frontend
+==================================== */
 setInterval(() => {
   const dataArray = Object.values(latestData);
 
   if (dataArray.length > 0) {
-    // ordena pelo volume decrescente
     const sorted = dataArray.sort((a, b) => b.volume - a.volume);
 
-    // sempre BTC e ETH no topo
     const btc = sorted.find((coin) => coin.symbol.toLowerCase() === "btcusdt");
     const eth = sorted.find((coin) => coin.symbol.toLowerCase() === "ethusdt");
+
     const others = sorted.filter(
       (coin) =>
         coin.symbol.toLowerCase() !== "btcusdt" &&
@@ -181,7 +182,6 @@ setInterval(() => {
 
     const topCoins = [btc, eth, ...others.slice(0, TOP_LIMIT - 2)].filter(Boolean);
 
-    // transforma em objeto
     const dataObject = Object.fromEntries(
       topCoins.map((coin) => [
         coin.symbol.toUpperCase(),
@@ -198,14 +198,12 @@ setInterval(() => {
   }
 }, THROTTLE_INTERVAL);
 
-
-
-
-// portas
+/* ====================================
+   Inicialização do servidor
+==================================== */
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
-
- // startBinanceSync();
   startCleanHistoryService();
 });
