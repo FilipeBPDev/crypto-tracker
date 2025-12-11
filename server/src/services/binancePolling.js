@@ -21,26 +21,21 @@ const lastSave = new Map();
 console.log("TOP_PAIRS:", TOP_PAIRS);
 
 /* ==========================================
-   Busca REST na CoinGecko
+   Busca REST única na CoinGecko
 ========================================== */
-async function fetchTicker(id) {
+async function fetchAllTickers() {
   try {
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
+    const ids = TOP_PAIRS.join(",");
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
 
     const res = await fetch(url);
 
     if (!res.ok) {
-      console.log("ERRO COINGECKO:", id, res.status, res.statusText);
+      console.log("ERRO COINGECKO (MULTI):", res.status, res.statusText);
       return null;
     }
 
-    const data = await res.json();
-
-    return {
-      price: data[id]?.usd ?? null,
-      percent: data[id]?.usd_24h_change ?? 0,
-      volume: data[id]?.usd_24h_vol ?? 0
-    };
+    return await res.json();
 
   } catch (err) {
     console.error("Erro CoinGecko:", err);
@@ -52,28 +47,32 @@ async function fetchTicker(id) {
    Polling principal
 ========================================== */
 export function startBinancePolling(onUpdate) {
-  console.log("PRODUÇÃO: Iniciando REST Polling (CoinGecko)...");
+  console.log("PRODUÇÃO: Iniciando REST Polling (CoinGecko - MultiFetch)...");
 
   setInterval(async () => {
+    const tickers = await fetchAllTickers();
+    if (!tickers) return;
+
     for (const id of TOP_PAIRS) {
-      const ticker = await fetchTicker(id);
-      if (!ticker) continue;
+      const info = tickers[id];
+      if (!info) continue;
 
-      const { price, percent, volume } = ticker;
+      const price = info.usd ?? 0;
+      const percent = info.usd_24h_change ?? 0;
+      const volume = info.usd_24h_vol ?? 0;
 
-      // atualiza latestData no servidor
+      // Atualiza latestData no servidor
       if (onUpdate) {
         onUpdate(id.toUpperCase(), price, percent, volume);
       }
 
-      // salva histórico a cada 1 minuto por moeda
+      // Salva histórico 1x por minuto
       const now = Date.now();
       const previous = lastSave.get(id) || 0;
 
       if (now - previous >= SAVE_INTERVAL) {
         await insertRecord(id.toUpperCase(), price, percent);
         lastSave.set(id, now);
-
         console.log(`Histórico salvo (REST): ${id.toUpperCase()}`);
       }
     }
