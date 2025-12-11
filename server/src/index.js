@@ -137,17 +137,16 @@ io.on("connection", (socket) => {
    Mapeamento dos nomes das moedas
 ==================================== */
 const COIN_NAMES = {
-  BTCUSDT: "bitcoin",
-  ETHUSDT: "ethereum",
-  SOLUSDT: "solana",
-  BNBUSDT: "binancecoin",
-  XRPUSDT: "ripple",
-  ADAUSDT: "cardano",
-  DOGEUSDT: "dogecoin",
-  DOTUSDT: "polkadot",
-  TRXUSDT: "tron",
-  LINKUSDT: "chainlink",
-  TONUSDT: "toncoin",
+  BITCOIN: "bitcoin",
+  ETHEREUM: "ethereum",
+  BINANCECOIN: "binancecoin",
+  SOLANA: "solana",
+  RIPPLE: "ripple",
+  CARDANO: "cardano",
+  DOGECOIN: "dogecoin",
+  CHAINLINK: "chainlink",
+  TONCOIN: "toncoin",
+  TRON: "tron"
 };
 
 /* ====================================
