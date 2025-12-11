@@ -162,6 +162,11 @@ startBinancePolling((symbol, price, percent, volume) => {
   };
 });
 
+
+
+setInterval(() => {
+  console.log("DEBUG latestData:", latestData);
+}, 5000);
 /* ====================================
    Emissão periódica dos dados ao frontend
 ==================================== */
