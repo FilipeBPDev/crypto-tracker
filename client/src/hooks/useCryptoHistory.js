@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api.js";
 
 /* ==========================================
-   Hook de histórico de preços (REST)
-   Responsável APENAS por buscar dados
+   Hook de histórico (CoinGecko IDs)
 ========================================== */
-export const useCryptoHistory = (symbol, limit = 1440) => {
-  const [chartData, setChartData] = useState([]); // sempre array
+export const useCryptoHistory = (symbol, limit = 30) => {
+  const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,28 +17,12 @@ export const useCryptoHistory = (symbol, limit = 1440) => {
         setLoading(true);
         setError(null);
 
-        const response = await api.get(
-          `history/${symbol}?limit=${limit}`
-        );
+        const res = await api.get(`history/${symbol}?limit=${limit}`);
 
-        /* ==========================================
-           Normalização do response
-           (protege contra mudanças no backend)
-        ========================================== */
-        const data =
-          response.data?.chartData ||
-          response.data?.data ||
-          response.data ||
-          [];
-
-        if (!Array.isArray(data)) {
-          throw new Error("Formato de histórico inválido");
-        }
-
-        setChartData(data);
+        setChartData(res.data?.chartData || []);
       } catch (err) {
-        console.error("Erro ao buscar histórico:", err);
-        setError("Erro ao carregar histórico da moeda");
+        console.error(err);
+        setError("Erro ao carregar histórico");
         setChartData([]);
       } finally {
         setLoading(false);

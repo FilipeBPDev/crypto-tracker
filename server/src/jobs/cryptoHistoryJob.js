@@ -2,58 +2,45 @@ import axios from "axios";
 import { insertRecord } from "../DAO/cryptoHistoryDAO.js";
 
 /* ==========================================
-   Job de gravação de histórico de criptos
-   Responsável por popular a tabela crypto_history
-   automaticamente (sem depender do frontend)
+   Job de histórico (CoinGecko)
 ========================================== */
 
-// símbolos monitorados
-const SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
+const COINS = [
+  "bitcoin",
+  "ethereum",
+  "binancecoin",
+  "solana",
+  "ripple",
+];
 
-// intervalo de salvamento (1 minuto)
 const SAVE_INTERVAL = 60 * 1000;
 
-/* ==========================================
-   Inicia o job de histórico
-========================================== */
 export const startCryptoHistoryJob = () => {
-  console.log("[JOB] Crypto history job iniciado");
+  console.log("[JOB] CoinGecko history job iniciado");
 
   setInterval(async () => {
     try {
-      for (const symbol of SYMBOLS) {
-        /* ==========================================
-           Busca dados atuais da Binance
-        ========================================== */
-        const { data } = await axios.get(
-          "https://api.binance.com/api/v3/ticker/24hr",
-          { params: { symbol } }
-        );
-
-        const price = parseFloat(data.lastPrice);
-        const change24h = parseFloat(data.priceChangePercent);
-
-        if (isNaN(price) || isNaN(change24h)) {
-          console.warn(
-            `[JOB] dados inválidos ignorados para ${symbol}`
-          );
-          continue;
+      const { data } = await axios.get(
+        "https://api.coingecko.com/api/v3/simple/price",
+        {
+          params: {
+            ids: COINS.join(","),
+            vs_currencies: "usd",
+            include_24hr_change: "true",
+          },
         }
-
-        /* ==========================================
-           Insere no histórico
-        ========================================== */
-        await insertRecord(symbol, price, change24h);
-
-        console.log(
-          `[JOB] histórico salvo | ${symbol} | ${price}`
-        );
-      }
-    } catch (error) {
-      console.error(
-        "[JOB] erro ao salvar histórico:",
-        error.message
       );
+
+      for (const coin of COINS) {
+        const price = data?.[coin]?.usd;
+        const change = data?.[coin]?.usd_24h_change;
+
+        if (!price || change === undefined) continue;
+
+        await insertRecord(coin, price, change);
+      }
+    } catch (err) {
+      console.error("[JOB] erro:", err.message);
     }
   }, SAVE_INTERVAL);
 };
