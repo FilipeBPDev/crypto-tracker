@@ -60,7 +60,7 @@ export default function MarketHistory() {
           ) : chartData?.length > 0 ? (
             <div className="relative w-full">
               <div className="aspect-[16/8] sm:aspect-[16/7] md:aspect-[16/6]">
-                <MarketChart chartData={chartData} mode="market" />
+                <MarketChart chartData={chartData} mode="global" />
               </div>
             </div>
           ) : (

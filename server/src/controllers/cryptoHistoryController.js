@@ -109,13 +109,7 @@ export const getHistoryBySymbolController = async (req, res) => {
 
         //retorna o horario
         const formatarHora = (isoString) => {
-          const date = new Date(isoString);
-          return date.toLocaleString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            day: "2-digit",
-            month: "2-digit",
-          });
+        return new Date(isoString).getTime(); // timestamp
         };
 
             //formata pro grafico

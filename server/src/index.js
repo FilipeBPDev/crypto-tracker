@@ -9,6 +9,7 @@ import portfolioRoutes from "../src/routes/portfolioRoutes.js";
 import transactionRoutes from "../src/routes/transactionsRoutes.js";
 import cryptoHistoryRoutes from "../src/routes/cryptoHistoryRoutes.js";
 import authRoutes from "../src/routes/authRoutes.js";
+import { startCryptoHistoryJob } from "./jobs/cryptoHistoryJob.js";
 
 import { db } from "./config/db/connection.js";
 import { startBinancePolling } from "./services/binancePolling.js";
@@ -201,6 +202,8 @@ setInterval(() => {
     io.emit("marketUpdate", dataObject);
   }
 }, THROTTLE_INTERVAL);
+
+startCryptoHistoryJob();
 
 /* ====================================
    Inicialização do servidor

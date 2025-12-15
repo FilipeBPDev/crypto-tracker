@@ -11,12 +11,15 @@ import {
   Legend,
 } from "recharts";
 
-import { useState } from "react";
-import { useCryptoHistory } from "../../hooks/useCryptoHistory";
-import useMarketChart from "../../hooks/useMarketChart";
+import { useState, useMemo } from "react";
+import { useCryptoHistory } from "../../hooks/useCryptoHistory-edit***";
+import useMarketChart from "../../hooks/useMarketChart-edit***";
 import LivePrice from "../LivePrice/LivePrice";
 import FavoriteButton from "../FavoriteButton/FavoriteButton";
 
+/* ==========================================
+   Componente principal do gráfico de mercado
+========================================== */
 export const MarketChart = ({
   chartData: externalData,
   mode: externalMode,
@@ -25,54 +28,90 @@ export const MarketChart = ({
 }) => {
   const [selectedSymbol, setSelectedSymbol] = useState(initialSymbol);
 
-  // busca historico da moeda quando troca a moeda
+  /* ==========================================
+     Busca histórico da moeda (REST)
+  ========================================== */
   const {
     chartData: historyData,
     loading,
     error,
   } = useCryptoHistory(selectedSymbol, 30);
 
-  // hook global (so usamos o mode)
+  /* ==========================================
+     Hook global (por enquanto usamos só o mode)
+  ========================================== */
   const { mode: globalMode } = useMarketChart({ user });
 
-  // escolha final dos dados
+  /* ==========================================
+     Definição final de dados e modo
+  ========================================== */
   const finalData = externalData || historyData || [];
   const finalMode = externalMode || globalMode;
 
   const COLORS = ["#3B82F6", "#22C55E", "#EAB308", "#EC4899", "#8B5CF6"];
 
-  // preco base
-  const basePrice = finalData.length > 0 ? finalData[0].price : 0;
+  /* ==========================================
+     Normalização dos dados (CRÍTICO p/ REST)
+     Garante que o gráfico receba sempre:
+     { time, price }
+  ========================================== */
+  const normalizedData = useMemo(() => {
+    return finalData
+      .map((item) => ({
+        time: item.time || item.timestamp || item.date || item.openTime,
+        price: Number(item.price || item.close || item.value),
+      }))
+      .filter(
+        (item) =>
+          item.time !== undefined && !Number.isNaN(item.price) && item.price > 0
+      );
+  }, [finalData]);
 
-  // variacao %
-  const percentData = finalData.map((item) => ({
-    ...item,
-    percent: basePrice > 0 ? ((item.price - basePrice) / basePrice) * 100 : 0,
-  }));
+  /* ==========================================
+     Cálculo da variação percentual
+  ========================================== */
+  const basePrice = normalizedData.length ? normalizedData[0].price : 0;
 
-  // filtro pq o grafico fica mais leve
-  const filteredPercentData = percentData.filter((_, i) => i % 3 === 0);
+  const percentData = useMemo(() => {
+    if (basePrice === 0) return [];
 
-  // moedas padroes
+    return normalizedData.map((item) => ({
+      ...item,
+      percent: ((item.price - basePrice) / basePrice) * 100,
+    }));
+  }, [normalizedData, basePrice]);
+
+  /* ==========================================
+     Filtro opcional para performance
+  ========================================== */
+  const filteredPercentData =
+    percentData.length > 20
+      ? percentData.filter((_, i) => i % 3 === 0)
+      : percentData;
+
+  /* ==========================================
+     Moedas padrão
+  ========================================== */
   const coins = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"];
 
   return (
     <div
       className="bg-[rgba(15,23,42,0.6)]
-             border border-[rgba(255,255,255,0.08)]
-             rounded-2xl backdrop-blur-2xl
-             shadow-[0_4px_30px_rgba(0,0,0,0.25)]
-             p-4 transition-all duration-300
-             hover:shadow-[0_0_20px_rgba(88,101,242,0.1)]"
+                 border border-[rgba(255,255,255,0.08)]
+                 rounded-2xl backdrop-blur-2xl
+                 shadow-[0_4px_30px_rgba(0,0,0,0.25)]
+                 p-4 transition-all duration-300
+                 hover:shadow-[0_0_20px_rgba(88,101,242,0.1)]"
     >
-      {/* header do card */}
+      {/* ==========================================
+         Header do card
+      ========================================== */}
       <div
         className="
           flex flex-col gap-3 mb-4
           md:flex-row md:items-center md:justify-between
         "
       >
-        {/* bloco titulo + preco + favorito */}
         <div className="flex flex-col md:flex-row md:items-center md:gap-3 text-center md:text-left">
           <h2 className="text-lg md:text-xl font-semibold text-gray-200 capitalize leading-tight">
             {finalMode === "user"
@@ -80,7 +119,6 @@ export const MarketChart = ({
               : `tendência de ${selectedSymbol}`}
           </h2>
 
-          {/* bloco preco + favorito (no mobile fica lado a lado, centralizado) */}
           {finalMode !== "user" && (
             <div className="flex items-center justify-center gap-2 mt-1 md:mt-0">
               <LivePrice symbol={selectedSymbol} />
@@ -89,7 +127,6 @@ export const MarketChart = ({
           )}
         </div>
 
-        {/* seletor de moeda - fica abaixo no mobile, à direita no desktop */}
         {!externalData && finalMode !== "user" && (
           <select
             value={selectedSymbol}
@@ -109,13 +146,24 @@ export const MarketChart = ({
         )}
       </div>
 
-      {/* loading / erro */}
+      {/* ==========================================
+         Estados de carregamento / erro
+      ========================================== */}
       {loading && (
         <p className="text-gray-400 text-center">carregando dados...</p>
       )}
+
       {error && <p className="text-red-400 text-center">{error}</p>}
 
-      {/* grafico */}
+      {!loading && filteredPercentData.length < 2 && (
+        <p className="text-gray-400 text-center">
+          dados insuficientes para gerar o gráfico
+        </p>
+      )}
+
+      {/* ==========================================
+         Gráfico
+      ========================================== */}
       <ResponsiveContainer width="100%" height={250}>
         {finalMode === "user" ? (
           <PieChart>
@@ -129,7 +177,7 @@ export const MarketChart = ({
               outerRadius={90}
               label
             >
-              {finalData.map((entry, i) => (
+              {finalData.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
@@ -145,7 +193,15 @@ export const MarketChart = ({
               </linearGradient>
             </defs>
 
-            <XAxis dataKey="time" stroke="#999" tick={{ fontSize: 12 }} />
+            <XAxis
+              dataKey="time"
+              stroke="#999"
+              tick={{ fontSize: 12 }}
+              tickFormatter={(v) =>
+                typeof v === "number" ? new Date(v).toLocaleTimeString() : v
+              }
+            />
+
             <YAxis
               stroke="#999"
               width={53}
@@ -153,6 +209,8 @@ export const MarketChart = ({
             />
 
             <Tooltip
+              formatter={(v) => `${v.toFixed(2)}%`}
+              labelStyle={{ color: "#cbd5e1" }}
               contentStyle={{
                 background: "rgba(255,255,255,0.12)",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -160,8 +218,6 @@ export const MarketChart = ({
                 borderRadius: "12px",
                 color: "#fff",
               }}
-              labelStyle={{ color: "#cbd5e1" }}
-              formatter={(v) => `${v.toFixed(2)}%`}
             />
 
             <Line
@@ -170,8 +226,12 @@ export const MarketChart = ({
               stroke="url(#colorLine)"
               strokeWidth={3.3}
               dot={false}
-              activeDot={{ r: 6, stroke: "#60A5FA", strokeWidth: 2 }}
-              isAnimationActive={true}
+              activeDot={{
+                r: 6,
+                stroke: "#60A5FA",
+                strokeWidth: 2,
+              }}
+              isAnimationActive
               animationDuration={700}
               animationEasing="ease-in-out"
             />
